@@ -66,6 +66,16 @@ def Make_2D_Image_Array():  # and resize to fit WINDOW_SIZE
         # show_H_image =cv2.vconcat([show_image, show_H_image])
     TWO_D_Image_Array = cv2.resize(show_H_image, WINDOW_SIZE, cv2.INTER_CUBIC)
 
+#=============================================
+def make_2d_video_array():
+    global image_array
+    global TWO_D_Image_Array
+    global cameras
+    TWO_D_Image_Array = []
+    show_image = image_array[0].copy()  # make initial image to show
+    for i in range(1,len(cameras)):
+        show_image = cv2.hconcat([show_image, image_array[i]])
+    TWO_D_Image_Array = cv2.resize(show_image, (len(cameras)*CAM_RES[0],CAM_RES[1]), cv2.INTER_CUBIC)
 
 # ============================================
 def Print_Window_Size():
@@ -74,7 +84,7 @@ def Print_Window_Size():
     print(windowWidth)
     print(windowHeight)
 
-# ============================================
+#==============================================
 def end():
     print("Program END")
     # Release camera resources
@@ -99,8 +109,6 @@ def takePictures(c):
                 ret, frame = camera.read()
                 if ret:
                     image_array.append(frame)
-                    # images.append(frame)
-                #                cv2.imwrite("Test"+".jpg", frame ,[cv2.IMWRITE_JPEG_QUALITY, 100])
                 else:
                     print(f"Error capturing image from camera {cameras.index(camera)}")
             except:
@@ -110,13 +118,20 @@ def takePictures(c):
         camera_index = c % len(cameras)
         camera = cameras[camera_index]
         try:
-            ret, frame = camera.read()
+            #ret, frame = camera.read()
+            ret = camera.grab()
             if ret:
+                frame = camera.retrieve()[1]
                 image_array.append(frame)
+                if SHOW_IMAGE_AFTER_CAPTURE:
+                    cv2.imshow(MAIN_WINDOW, frame)
+                    cv2.waitKey(1)
             else:
                 print(f"Error capturing image from camera {camera}")
+                end()
         except:
             print(f"Error try capturing image from camera {camera}")
+            end()
 
     print("len of image array after take picture is: ", len(image_array))
 # ======================================
@@ -131,43 +146,33 @@ def get_first_folder_name(path):
 # ==========================================
 # save the images
 def save_images():
-	global image_array
-	Number_of_Images = len(image_array)
-	print("==============================")
-	new_dir_name = ""
-	# check if a usb drive is connected (the USB is the first folder in the path '/media/mada'
-	first_folder_name = get_first_folder_name(PATH_OF_USBS)
-	if first_folder_name:
-		print("found USB drive:", first_folder_name)
-		timeString = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-	    #new_dir_name = "/media/mada/80F2-CDC9/photogrammetria" + "/Images_" + timeString
-		if not os.path.exists(PATH_OF_USBS + first_folder_name + "/" + NAME_OF_FOLDER_IN_USB):
-			os.mkdir(PATH_OF_USBS + first_folder_name + "/" + NAME_OF_FOLDER_IN_USB)
-		new_dir_name = PATH_OF_USBS + first_folder_name + "/" + NAME_OF_FOLDER_IN_USB + "/Images_" + timeString
-	else:
-		print("No USB drive found.")
-		timeString = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-		new_dir_name = os.getcwd() + "/Images_" + timeString
-	print(f'saving {Number_of_Images} images in directory {new_dir_name}')
-	os.mkdir(new_dir_name)
-	#save each image in the directory
-	for i in range(Number_of_Images):
-		# print (new_dir_name + "/" + str(i) + ".jpg")
-		cv2.imwrite(new_dir_name + "/" + str(i) + ".jpg", image_array[i],[cv2.IMWRITE_JPEG_QUALITY, 100])
-		print(f'saved image number {i}')
-    
-
-cv2.namedWindow(MAIN_WINDOW, cv2.WINDOW_FREERATIO)  # WINDOW_NORMAL place holder
-cv2.setWindowProperty(MAIN_WINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-# cv2.setWindowProperty(MAIN_WINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_AUTOSIZE)
-#cv2.setWindowProperty(MAIN_WINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL)
-
-
+    global image_array
+    global Number_of_Images
+    print("==============================")
+    new_dir_name = ""
+    # check if a usb drive is connected (the USB is the first folder in the path '/media/mada')
+    first_folder_name = get_first_folder_name(PATH_OF_USBS)
+    if first_folder_name:
+        print("found USB drive:", first_folder_name)
+        timeString = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+        #new_dir_name = "/media/mada/80F2-CDC9/photogrammetria" + "/Images_" + timeString
+        if not os.path.exists(PATH_OF_USBS + first_folder_name + "/" + NAME_OF_FOLDER_IN_USB):
+            os.mkdir(PATH_OF_USBS + first_folder_name + "/" + NAME_OF_FOLDER_IN_USB)
+        new_dir_name = PATH_OF_USBS + first_folder_name + "/" + NAME_OF_FOLDER_IN_USB + "/Images_" + timeString
+    else:
+        print("No USB drive found.")
+        timeString = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+        new_dir_name = os.getcwd() + "/Images_" + timeString
+    print(f'saving {Number_of_Images} images in directory {new_dir_name}')
+    os.mkdir(new_dir_name)
+    #save each image in the directory
+    for i in range(Number_of_Images):
+        # print (new_dir_name + "/" + str(i) + ".jpg")
+        cv2.imwrite(new_dir_name + "/" + str(i) + ".jpg", image_array[i],[cv2.IMWRITE_JPEG_QUALITY, 100])
+        print(f'saved image number {i}')
 
 # ================================
 # ========== program start here===================
-cv2.namedWindow(MAIN_WINDOW, cv2.WINDOW_NORMAL)  # plase holder for WINDOW_NORMAL
-# amir_image = cv2.imread("AMIR12310_100.jpg")
 
 # check  USB cameras
 for i in range(0,4):
@@ -190,41 +195,40 @@ print(f"found  {len(cameras)} USB camera(s) ")
 if len(cameras) == 0:
 	end()
 
-# images = []
-takePictures(0)
-Number_of_Images = len(image_array)  # global variable used in many routins
-print("Number_of_Images", Number_of_Images)
-# fill_temp_images(amir_image,Number_of_Images)
-make_dummy_image()
-fill_dummy_images()
-Make_2D_Image_Array()
-cv2.imshow(MAIN_WINDOW, TWO_D_Image_Array)
-in_key = cv2.waitKey(1)  # 10, wait for key for 10us
-time.sleep(0.5)
+
+cv2.namedWindow(MAIN_WINDOW, cv2.WINDOW_FREERATIO)  # WINDOW_NORMAL place holder
+#cv2.setWindowProperty(MAIN_WINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+#cv2.setWindowProperty(MAIN_WINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_AUTOSIZE)
+cv2.setWindowProperty(MAIN_WINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL)
+cv2.namedWindow(MAIN_WINDOW, cv2.WINDOW_NORMAL)  # plase holder for WINDOW_NORMAL
+cv2.resizeWindow(MAIN_WINDOW, int(SCALE*CAM_RES[0]*len(cameras)), int(SCALE*CAM_RES[1]))
+
 image_array = []  # clear images array !!! need to save before
 
 while True:
-    if SHOW_LIVE_VIDEO:
-        for camera in cameras:
-            try:
-                ret, frame = camera.read()
-                if ret:
-                    image_array.append(frame)
-                    # cv2.imshow(MAIN_WINDOW, frame)
-                else:
-                    print(f"Error capturing image from camera {cameras.index(camera)}")
-                    end()
-            except:
-                print(f"Error try capturing image from camera {cameras.index(camera)}")
-                end()
 
+    #clear the buffer for each camera
+    # grab() only takes the picture and insert it to a temporary buffer, retrieve() takes the picture from the buffer and returns it. read() is grab() and retrive()
+    # to clear the buffer, we grab() on each camera all the time
+    for camera in cameras:
+        try:
+            #ret, frame = camera.read()
+            ret = camera.grab()
+            if ret:
+                if SHOW_LIVE_VIDEO:
+                    image_array.append(camera.retrieve()[1])
+            else:
+                print(f"Error capturing image from camera {cameras.index(camera)}")
+                end()
+        except:
+            print(f"Error try capturing image from camera {cameras.index(camera)}")
+            end()
+
+    if SHOW_LIVE_VIDEO:
         Number_of_Images = len(image_array)  # global variable used in many routins
-        make_dummy_image()
-        fill_dummy_images()
-        Make_2D_Image_Array()
+        make_2d_video_array() # use the 2d image array but for the video
         cv2.imshow(MAIN_WINDOW, TWO_D_Image_Array)
         image_array = []
-
 
     in_key = cv2.waitKey(10)  # wait for key for 10us
     if in_key != -1:
@@ -239,7 +243,7 @@ while True:
     if (in_key == Full_Screen_Window_Size_Key_Code):
         cv2.setWindowProperty(MAIN_WINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         # cv2.setWindowProperty(MAIN_WINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL)
-        # cv2.setWindowProperty(MAIN_WINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_AUTOSIZE) #
+        # cv2.setWindowProperty(MAIN_WSINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_AUTOSIZE) #
 
     if (in_key == Start_Key_Code):  # "0" (zero - start) - make directory for save images
         SHOW_LIVE_VIDEO = False
@@ -247,6 +251,8 @@ while True:
         print("Char_from_KB is ", Char_from_KB)
         image_array = []
         Number_of_Images = 0
+        if not TAKE_IMAGE_ON_ALL_CAMERAS:
+            cv2.resizeWindow(MAIN_WINDOW, int(SCALE*CAM_RES[0]), int(SCALE*CAM_RES[1]))
 
     if ((in_key >= First_Angle_Key_Code) and (
             in_key <= Last_Angle_Key_Code)):  # first and last both included used later for file name
@@ -256,28 +262,28 @@ while True:
         Number_of_Cameras = len(cameras)
         print("Char_from_KB is ", Char_from_KB)
         Number_of_Images = len(image_array)  # global variable used in many routins
-        if (Number_of_Images < MAX_IMAGE_TO_SHOW):
+        if Number_of_Images < MAX_IMAGE_TO_SHOW:
             takePictures(in_key)
+            
     if in_key == All_Done_Key_Code:
         if SHOW_LIVE_VIDEO: #1 is pressed before any pictures were taken
             continue 
         SHOW_LIVE_VIDEO = True
         Char_from_KB = in_key
-        print("Char_from_KB is ", Char_from_KB)
+        print("Char_from_KB is ", Char_from_KB)  
         Number_of_Images = len(image_array)  # global variable used in many routins
-        save_images() # save the images in a new directory
+        cv2.setWindowProperty(MAIN_WINDOW, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         make_dummy_image()
         fill_dummy_images()
         Make_2D_Image_Array()
         cv2.imshow(MAIN_WINDOW, TWO_D_Image_Array)
-        cv2.waitKey(10)
-        time.sleep(0.5)
-
-        time.sleep(TIME_SLEEP_AFTER_DONE)
+        cv2.waitKey(1)
+        save_images() # save the images in a new directory     
+        #time.sleep(TIME_SLEEP_AFTER_DONE)
+        cv2.resizeWindow(MAIN_WINDOW, int(SCALE*CAM_RES[0]*len(cameras)), int(SCALE*CAM_RES[1]))
         image_array = []  # cleare images array !!! nead to save before
         # in_key = cv2.waitKey(0)  # wait for key for 10us
         # if (in_key == 27):
         #     break
-
 
 end()
