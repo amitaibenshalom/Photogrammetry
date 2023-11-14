@@ -1,0 +1,14 @@
+{
+    "meshing": {
+        "outputMesh": true,
+        "outputTex": true,
+        "outputColor": true,
+        "outputNormals": false,
+        "textureSize": 2048,
+        "inputIsDense": true
+    },
+    "texturing": {
+        "textureType": "atlantic",
+        "textureDownscale": 4
+    }
+}
