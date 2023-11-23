@@ -36,42 +36,71 @@ def get_nth_obj_in_folder(folder_path, n):
     texture_file_path = os.path.join(folder_path, items[-n], 'output/texture_1001.png')
     return obj_file_path, texture_file_path
 
-photogrammetry_data_path = r'C:\Users\amita\OneDrive - The Bloomfield Science Museum in Jerusalem\photogrammetry_data'
-# obj_file_path = os.path.join(photogrammetry_data_path, 'texturedMesh.obj')
-# texture_file_path = os.path.join(photogrammetry_data_path, 'texture_1001.png')
+# photogrammetry_data_path = r'C:\Users\amita\OneDrive - The Bloomfield Science Museum in Jerusalem\photogrammetry_data'
+photogrammetry_data_path = r'D:\photogrammetry\OneDrive - The Bloomfield Science Museum in Jerusalem\photogrammetry_data'
 
-# wait for the object file to be created by Meshroom (or use a timeout)
-# while not os.path.exists(obj_file_path):
-#     time.sleep(1)
+def next(obj, ename):
+    # mesh.alpha(1 - mesh.alpha())  # toggle mesh transparency
+    # bu.switch()                   # change to next status
+    # printc(bu.status(), box="_", dim=True)
+    global model_number
+    model_number += 1
+    plt.close()
 
-# get the last modified folder in the photogrammetry data path (the one that was just created by Meshroom) and get the obj file path from it
-# obj_file_path, texture_file_path = get_last_obj(photogrammetry_data_path)
-#
-# mesh = Mesh(obj_file_path)
-# mesh.texture(texture_file_path, scale=0.1)
-# mesh.show(size=("f","f"))
+def prev(obj, ename):
+    # mesh.alpha(1 - mesh.alpha())  # toggle mesh transparency
+    # bu.switch()                   # change to next status
+    # printc(bu.status(), box="_", dim=True)
+    global model_number
+    model_number -= 1
+    plt.close()
 
 model_number = 0
-# screen = pygame.display.set_mode((640, 480), 0, 32)
 while True:
-    # show the mesh number model_number
+
+    if model_number >= len(os.listdir(photogrammetry_data_path)):
+        model_number = 0
+    if model_number < 0:
+        model_number = len(os.listdir(photogrammetry_data_path)) - 1
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     if obj_file_path is None:
         break
-    show_mesh(obj_file_path, texture_file_path)
-    model_number += 1
-    if model_number >= len(os.listdir(photogrammetry_data_path)):
-        model_number = 0
 
-# thread = threading.Thread(target=mesh.show(size=("f", "f")))
-#
-# thread.start()
-# # # print(time.time())
-# thread.join(timeout=5)
-# # # print(time.time())
-# if thread.is_alive():
-#     print("Timeout reached. Interrupting the thread.")
-#     thread.join()  # Wait for the thread to finish after interruption
-# else:
-#     print("Thread completed before timeout.")
+    print("showing model number", model_number)
+    # try:
+    #     mesh = Mesh(obj_file_path)
+    #     mesh.texture(texture_file_path, scale=0.1)
+    #     # mesh.show(size=("f","f")).clear()
+    #     plt.show(mesh, __doc__).close()
+    # except:
+    #     print("Error showing mesh")
+    plt = Plotter()
+    bu = plt.add_button(
+        next,
+        pos=(0.9, 0.1),   # x,y fraction from bottom left corner
+        states=["NEXT", "error"],  # text for each state
+        c=["w", "w"],     # font color for each state
+        bc=["dg", "dv"],  # background color for each state
+        font="courier",   # font type
+        size=45,          # font size
+        bold=True,        # bold font
+        italic=False,     # non-italic font style
+    )
+    bu2 = plt.add_button(
+        prev,
+        pos=(0.8, 0.1),   # x,y fraction from bottom left corner
+        states=["PREV", "error"],  # text for each state
+        c=["w", "w"],     # font color for each state
+        bc=["dg", "dv"],  # background color for each state
+        font="courier",   # font type
+        size=45,          # font size
+        bold=True,        # bold font
+        italic=False,     # non-italic font style
+    )
+    mesh = Mesh(obj_file_path)
+    mesh.texture(texture_file_path, scale=0.1)
+    # mesh.show(size=("f","f")).clear()
+    plt.show(mesh, __doc__,size=("f","f")).close()
+    # show_mesh(obj_file_path, texture_file_path)
+
 print("done")
