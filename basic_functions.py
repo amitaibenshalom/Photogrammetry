@@ -1,6 +1,7 @@
 from vedo import *
 import os
 from consts import *
+import time
 
 
 def get_last_obj(path):
@@ -28,8 +29,8 @@ def next(obj, ename):
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
-    # bu.switch()
-    plt.show(mesh, __doc__)
+    plt.break_interaction()
+    plt.show(mesh)
     
 
 def prev(obj, ename):
@@ -42,8 +43,9 @@ def prev(obj, ename):
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
-    # bu2.switch()
-    plt.show(mesh, __doc__)
+    plt.break_interaction()
+    plt.show(mesh)
+    
 
 
 plt = Plotter()
