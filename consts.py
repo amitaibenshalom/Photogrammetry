@@ -6,4 +6,4 @@ obj_path = r'output/texturedMesh.obj'
 texture_path = r'output/texture_1001.png'
 
 model_number = 0
-MAX_MODEL_NUMBER = 5
+MAX_MODEL_NUMBER = 15
