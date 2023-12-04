@@ -3,7 +3,6 @@ import os
 from consts import *
 import time
 
-
 def get_last_obj(path):
     obj_file_path = os.path.join(max([os.path.join(path, d) for d in os.listdir(path)], key=os.path.getmtime), obj_path)
     texture_file_path = os.path.join(max([os.path.join(path, d) for d in os.listdir(path)], key=os.path.getmtime), texture_path)
@@ -22,23 +21,23 @@ def get_nth_obj_in_folder(folder_path, n):
 def next(obj, ename):
     global model_number
     global plt
-    model_number += 1
-    if model_number >= MAX_MODEL_NUMBER or model_number >= len(os.listdir(photogrammetry_data_path)):
-        model_number = 0
+    model_number -= 1
+    if model_number < 0:
+        model_number = min(MAX_MODEL_NUMBER-1, len(os.listdir(photogrammetry_data_path)) - 1)
     plt.clear()
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
     plt.break_interaction()
     plt.show(mesh)
-    
+
 
 def prev(obj, ename):
     global model_number
     global plt
     model_number -= 1
-    if model_number < 0:
-        model_number = min(MAX_MODEL_NUMBER-1, len(os.listdir(photogrammetry_data_path)) - 1)
+    if model_number >= MAX_MODEL_NUMBER or model_number >= len(os.listdir(photogrammetry_data_path)):
+        model_number = 0
     plt.clear()
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
