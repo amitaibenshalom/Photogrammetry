@@ -1,4 +1,5 @@
 from basic_functions import *
+import time
 
 # show first model - the rest will be shown by the buttons
 model_number = 0

@@ -1,7 +1,10 @@
+import vedo
 from vedo import *
 import os
 from consts import *
 import time
+
+
 
 def get_last_obj(path):
     obj_file_path = os.path.join(max([os.path.join(path, d) for d in os.listdir(path)], key=os.path.getmtime), obj_path)
@@ -44,7 +47,6 @@ def prev(obj, ename):
     mesh.texture(texture_file_path, scale=0.1)
     plt.break_interaction()
     plt.show(mesh)
-    
 
 
 plt = Plotter()
