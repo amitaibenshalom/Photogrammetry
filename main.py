@@ -41,7 +41,7 @@ def next(obj, ename):
 def prev(obj, ename):
     global model_number
     global plt
-    model_number -= 1
+    model_number += 1
     if model_number >= MAX_MODEL_NUMBER or model_number >= len(os.listdir(photogrammetry_data_path)):
         model_number = 0
     plt.clear()
@@ -52,7 +52,6 @@ def prev(obj, ename):
     plt.show(mesh)
 
 
-model_number = 0
 
 while (True):
     plt = Plotter()
@@ -78,6 +77,7 @@ while (True):
         bold=True,  # bold font
         italic=False,  # non-italic font style
     )
+    model_number = 0
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
