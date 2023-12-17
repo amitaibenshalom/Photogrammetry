@@ -8,7 +8,15 @@ import vedo
 from vedo import *
 import os
 from consts import *
+import win32gui
+import win32con
 
+
+def hide_taskbar():
+    win32gui.ShowWindow(win32gui.FindWindow("Shell_TrayWnd", None), win32con.SW_HIDE)
+
+def restore_taskbar():
+    win32gui.ShowWindow(win32gui.FindWindow("Shell_TrayWnd", None), win32con.SW_RESTORE)
 
 
 def get_last_obj(path):
@@ -36,6 +44,10 @@ def next(obj, ename):
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
+    # plt.break_interaction()
+    plt.add(mesh)
+    plt.reset_camera()
+    plt.reset_viewup()
     plt.break_interaction()
     while True:
         try:
@@ -55,6 +67,10 @@ def prev(obj, ename):
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
+    # plt.break_interaction()
+    plt.add(mesh)
+    plt.reset_camera()
+    plt.reset_viewup()
     plt.break_interaction()
     while True:
         try:
@@ -64,12 +80,16 @@ def prev(obj, ename):
             time.sleep(1)
 
 
+
+while (True):
+    hide_taskbar()
+    plt = Plotter(size=("f","f"))
 while True:
     plt = Plotter()
     bu = plt.add_button(
         next,
-        pos=(0.9, 0.1),  # x,y fraction from bottom left corner
-        states=["NEXT", "error"],  # text for each state
+        pos=(0.9, 0.15),  # x,y fraction from bottom left corner
+        states=["-->", "error"],  # text for each state
         c=["w", "w"],  # font color for each state
         bc=["dg", "dv"],  # background color for each state
         font="courier",  # font type
@@ -79,8 +99,8 @@ while True:
     )
     bu2 = plt.add_button(
         prev,
-        pos=(0.8, 0.1),  # x,y fraction from bottom left corner
-        states=["PREV", "error"],  # text for each state
+        pos=(0.8, 0.15),  # x,y fraction from bottom left corner
+        states=["<--", "error"],  # text for each state
         c=["w", "w"],  # font color for each state
         bc=["dg", "dv"],  # background color for each state
         font="courier",  # font type
@@ -92,6 +112,10 @@ while True:
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
+    # pic = Image("pictures\left_arrow.png")
+    # # pic.resize((200,0))
+    # pic = pic.clone2d(pos=(0.8,0.15),scale=0.1)
+    plt.show(mesh, __doc__,size=("f","f")).close()
     try :
         plt.show(mesh, __doc__,size=("f","f")).close()
     except:
