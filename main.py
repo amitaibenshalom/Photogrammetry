@@ -41,17 +41,16 @@ def next(obj, ename):
     if model_number < 0:
         model_number = min(MAX_MODEL_NUMBER-1, len(os.listdir(photogrammetry_data_path)) - 1)
     plt.clear()
-    obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-    mesh = Mesh(obj_file_path)
-    mesh.texture(texture_file_path, scale=0.1)
-    # plt.break_interaction()
-    plt.add(mesh)
-    plt.reset_camera()
-    plt.reset_viewup()
-    plt.break_interaction()
+
     while True:
         try:
-            plt.show(mesh)
+            obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
+            mesh = Mesh(obj_file_path)
+            mesh.texture(texture_file_path, scale=0.1)
+            # plt.break_interaction()
+            plt.add(mesh)
+            plt.reset_camera()
+            plt.reset_viewup()
             break
         except:
             time.sleep(1)
@@ -64,17 +63,16 @@ def prev(obj, ename):
     if model_number >= MAX_MODEL_NUMBER or model_number >= len(os.listdir(photogrammetry_data_path)):
         model_number = 0
     plt.clear()
-    obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-    mesh = Mesh(obj_file_path)
-    mesh.texture(texture_file_path, scale=0.1)
-    # plt.break_interaction()
-    plt.add(mesh)
-    plt.reset_camera()
-    plt.reset_viewup()
-    plt.break_interaction()
+    
     while True:
         try:
-            plt.show(mesh)
+            obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
+            mesh = Mesh(obj_file_path)
+            mesh.texture(texture_file_path, scale=0.1)
+            # plt.break_interaction()
+            plt.add(mesh)
+            plt.reset_camera()
+            plt.reset_viewup()
             break
         except:
             time.sleep(1)
@@ -84,8 +82,6 @@ def prev(obj, ename):
 while (True):
     hide_taskbar()
     plt = Plotter(size=("f","f"))
-while True:
-    plt = Plotter()
     bu = plt.add_button(
         next,
         pos=(0.9, 0.15),  # x,y fraction from bottom left corner
@@ -109,14 +105,13 @@ while True:
         italic=False,  # non-italic font style
     )
     model_number = 0
-    obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-    mesh = Mesh(obj_file_path)
-    mesh.texture(texture_file_path, scale=0.1)
     # pic = Image("pictures\left_arrow.png")
     # # pic.resize((200,0))
     # pic = pic.clone2d(pos=(0.8,0.15),scale=0.1)
-    plt.show(mesh, __doc__,size=("f","f")).close()
-    try :
+    try :    
+        obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
+        mesh = Mesh(obj_file_path)
+        mesh.texture(texture_file_path, scale=0.1)
         plt.show(mesh, __doc__,size=("f","f")).close()
     except:
         pass
