@@ -2,6 +2,8 @@
 # import time
 
 # show first model - the rest will be shown by the buttons
+import time
+
 import vedo
 from vedo import *
 import os
@@ -35,7 +37,12 @@ def next(obj, ename):
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
     plt.break_interaction()
-    plt.show(mesh)
+    while True:
+        try:
+            plt.show(mesh)
+            break
+        except:
+            time.sleep(1)
 
 
 def prev(obj, ename):
@@ -49,11 +56,15 @@ def prev(obj, ename):
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
     plt.break_interaction()
-    plt.show(mesh)
+    while True:
+        try:
+            plt.show(mesh)
+            break
+        except:
+            time.sleep(1)
 
 
-
-while (True):
+while True:
     plt = Plotter()
     bu = plt.add_button(
         next,
@@ -81,4 +92,7 @@ while (True):
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
-    plt.show(mesh, __doc__,size=("f","f")).close()
+    try :
+        plt.show(mesh, __doc__,size=("f","f")).close()
+    except:
+        pass
