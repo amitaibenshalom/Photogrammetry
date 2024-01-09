@@ -1,84 +1,113 @@
-# from basic_functions import *
-# import time
+import sys, pygame
+from pygame.locals import *
+from pygame.constants import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
+import time
 
-# show first model - the rest will be shown by the buttons
-import vedo
-from vedo import *
-import os
-from consts import *
-
-
-
-def get_last_obj(path):
-    obj_file_path = os.path.join(max([os.path.join(path, d) for d in os.listdir(path)], key=os.path.getmtime), obj_path)
-    texture_file_path = os.path.join(max([os.path.join(path, d) for d in os.listdir(path)], key=os.path.getmtime), texture_path)
-    return obj_file_path, texture_file_path
-
-def get_nth_obj_in_folder(folder_path, n):
-    items = os.listdir(folder_path)
-    if len(items) == 0 or n >= len(items):
-        return None
-    n += 1
-    obj_file_path = os.path.join(folder_path, items[-n], obj_path)
-    texture_file_path = os.path.join(folder_path, items[-n], texture_path)
-    return obj_file_path, texture_file_path
+# IMPORT OBJECT LOADER
+from objloader import *
 
 
-def next(obj, ename):
-    global model_number
-    global plt
-    model_number -= 1
-    if model_number < 0:
-        model_number = min(MAX_MODEL_NUMBER-1, len(os.listdir(photogrammetry_data_path)) - 1)
-    plt.clear()
-    obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-    mesh = Mesh(obj_file_path)
-    mesh.texture(texture_file_path, scale=0.1)
-    plt.break_interaction()
-    plt.show(mesh)
+# Initialize Pygame
+pygame.init()
 
+# Set the window size
+width, height = 800, 600
 
-def prev(obj, ename):
-    global model_number
-    global plt
-    model_number -= 1
-    if model_number >= MAX_MODEL_NUMBER or model_number >= len(os.listdir(photogrammetry_data_path)):
-        model_number = 0
-    plt.clear()
-    obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-    mesh = Mesh(obj_file_path)
-    mesh.texture(texture_file_path, scale=0.1)
-    plt.break_interaction()
-    plt.show(mesh)
+# Create a Pygame window
+pygame.display.set_mode((width, height), DOUBLEBUF | OPENGL)
 
+# Set up the OpenGL perspective projection matrix
+glViewport(0, 0, width, height)
+glMatrixMode(GL_PROJECTION)
+glLoadIdentity()
+gluPerspective(45, (width / height), 0.1, 50.0)
+glMatrixMode(GL_MODELVIEW)
+glLoadIdentity()
 
-model_number = 0
+# Set up the OpenGL rendering
+glShadeModel(GL_FLAT)
+glClearColor(0.0, 0.0, 0.0, 0.0)
+glClearDepth(1.0)
+glEnable(GL_DEPTH_TEST)
+glDepthFunc(GL_LESS)
 
-while (True):
-    plt = Plotter()
-    bu = plt.add_button(
-        next,
-        pos=(0.9, 0.1),  # x,y fraction from bottom left corner
-        states=["NEXT", "error"],  # text for each state
-        c=["w", "w"],  # font color for each state
-        bc=["dg", "dv"],  # background color for each state
-        font="courier",  # font type
-        size=45,  # font size
-        bold=True,  # bold font
-        italic=False,  # non-italic font style
-    )
-    bu2 = plt.add_button(
-        prev,
-        pos=(0.8, 0.1),  # x,y fraction from bottom left corner
-        states=["PREV", "error"],  # text for each state
-        c=["w", "w"],  # font color for each state
-        bc=["dg", "dv"],  # background color for each state
-        font="courier",  # font type
-        size=45,  # font size
-        bold=True,  # bold font
-        italic=False,  # non-italic font style
-    )
-    obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-    mesh = Mesh(obj_file_path)
-    mesh.texture(texture_file_path, scale=0.1)
-    plt.show(mesh, __doc__,size=("f","f")).close()
+# Rotation angle
+angle = 0.0
+
+# Function to handle rendering
+def render():
+    global angle
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glLoadIdentity()
+
+    # Move the model-view matrix to the center of the object
+    glTranslatef(0.0, 0.0, -5.0)
+
+    # Rotate around the local y-axis
+    glPushMatrix()
+    glRotatef(angle, 0.0, 1.0, 0)
+
+    # Draw your object (e.g., a cube)
+    glBegin(GL_QUADS)
+    # draw a 3d cube
+    # top
+    glColor3f(0.0, 1.0, 0.0)
+    glVertex3f(1.0, 1.0, -1.0)
+    glVertex3f(-1.0, 1.0, -1.0)
+    glVertex3f(-1.0, 1.0, 1.0)
+    glVertex3f(1.0, 1.0, 1.0)
+    # bottom
+    glColor3f(1.0, 0.5, 0.0)
+    glVertex3f(1.0, -1.0, 1.0)
+    glVertex3f(-1.0, -1.0, 1.0)
+    glVertex3f(-1.0, -1.0, -1.0)
+    glVertex3f(1.0, -1.0, -1.0)
+    # front
+    glColor3f(1.0, 0.0, 0.0)
+    glVertex3f(1.0, 1.0, 1.0)
+    glVertex3f(-1.0, 1.0, 1.0)
+    glVertex3f(-1.0, -1.0, 1.0)
+    glVertex3f(1.0, -1.0, 1.0)
+    # back
+    glColor3f(1.0, 1.0, 0.0)
+    glVertex3f(1.0, -1.0, -1.0)
+    glVertex3f(-1.0, -1.0, -1.0)
+    glVertex3f(-1.0, 1.0, -1.0)
+    glVertex3f(1.0, 1.0, -1.0)
+    # left
+    glColor3f(0.0, 0.0, 1.0)
+    glVertex3f(-1.0, 1.0, 1.0)
+    glVertex3f(-1.0, 1.0, -1.0)
+    glVertex3f(-1.0, -1.0, -1.0)
+    glVertex3f(-1.0, -1.0, 1.0)
+    # right
+    glColor3f(1.0, 0.0, 1.0)
+    glVertex3f(1.0, 1.0, -1.0)
+    glVertex3f(1.0, 1.0, 1.0)
+    glVertex3f(1.0, -1.0, 1.0)
+    glVertex3f(1.0, -1.0, -1.0)
+    glEnd()
+
+    # Restore the model-view matrix
+    glPopMatrix()
+
+    pygame.display.flip()
+
+# Main loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Update the rotation angle
+    angle += 1.0
+
+    render()
+    pygame.time.wait(10)  # Add a small delay to control the frame rate
+
+# Quit Pygame
+pygame.quit()
