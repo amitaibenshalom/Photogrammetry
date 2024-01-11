@@ -6,6 +6,7 @@ from OpenGL.GLU import *
 from pygame.locals import *
 from pygame.constants import *
 import shutil
+import logging
 
 from consts import *
 from pictures_consts import *
@@ -65,17 +66,7 @@ def end_model_view():
     global screen
     # pygame.display.quit()
     # pygame.display.init()
-    # pygame.display.set_caption("Photogrammetry")
-    # screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
     pygame.display.set_mode((0,0), pygame.FULLSCREEN)
-
-def ignoreFunc(file):
-    def _ignore_(path, names):  
-        ignored = []
-        if file in names:
-            ignored.append(file)
-        return set(ignored)
-    return _ignore_
 
 def copy_model_to_oneDrive(session_path, drive_path):
     # ignore cache and all the pictures except 6 (middle one)
@@ -84,10 +75,14 @@ def copy_model_to_oneDrive(session_path, drive_path):
         shutil.copytree(session_path, drive_path, ignore=shutil.ignore_patterns('cache','0.png','1.png','2.png','3.png','4.png','5.png','7.png','8.png','9.png', '10.png', '11.png'))
     except:
         print("ERROR COPYING TO ONE DRIVE")
+        logging.critical('ERROR WHILE COPYING TO ONE DRIVE')
+
+def init_log(log_file_path):
+    logging.basicConfig(filename=log_file_path, filemode='a', format='%(asctime)s ; %(message)s', level=logging.INFO)
+    logging.info('session started')
 
 pygame.display.set_caption("Photogrammetry")
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
-
 # pygame.mouse.set_visible(False)
 
 clock = pygame.time.Clock()
@@ -104,9 +99,6 @@ obj = None
 error_stopwatch = None
 model_stopwatch = None
 processing_stopwatch = None
-
-# output_directory = r"C:\Users\mada\Documents\photogrammetry\photogrammetry_data\2024-01-11-09-12-47\output"
-# state = State.MODEL_VIEW
 
 ret = open_camera()
 if not ret:
@@ -133,11 +125,11 @@ while True:
             screen.blit(error_pic, (0, 0))
             pygame.display.flip()
         elif time.time() - error_stopwatch > ERROR_SHOW_TIME:
+            logging.info('ending session from error - returning to instructions...')
             state = State.INSTRUCTIONS
             screen.blit(instructions_pic, (0, 0))
             error_stopwatch = None
             pygame.display.flip()
-        continue
 
     if state == State.INSTRUCTIONS:
         screen.blit(instructions_pic, (0, 0))
@@ -159,7 +151,10 @@ while True:
                 os.makedirs(input_directory)
                 os.makedirs(output_directory)
                 os.makedirs(cache_directory)
+                init_log(os.path.join(session_name, log_file_name))
                 image_number = 0
+                logging.info('taking pictures...')
+
     
     if state == State.TAKING_PICTURES:
         for event in events:
@@ -168,11 +163,15 @@ while True:
                 ret = take_picture(input_directory, str(image_number) + image_format)
                 if not ret:
                     print("ERROR TAKING PICTURE " + str(image_number))
+                    logging.critical('ERROR TAKING PICTURE ' + str(image_number))
                     state = State.CAMERA_ERROR
                     break
                 image_number += 1
             if event.type == pygame.KEYDOWN and event.key == END_KEY:
+                logging.info('pictures taken successfully')
                 state = State.PROCESSING
+                logging.info('processing...')
+
 
     if state == State.PROCESSING:
         if processing_stopwatch is None:
@@ -182,22 +181,24 @@ while True:
             # input_directory = "C:/Users/mada/Documents/photogrammetry/photogrammetry_data/2024-01-04-11-56-57-3854/images"
             ret = run_meshroom(input_directory, output_directory, cache_directory)
             if not ret:
-                print("ERROR RUNNING MESHROOM")
+                logging.critical('ERROR WHILE STARTING MESHROOM PROCESS')
                 state = State.ERROR
                 error_stopwatch = None
         if is_meshroom_done() and not is_meshroom_success():
-            print("ERROR RUNNING MESHROOM")
+            logging.error('meshroom failed')
             state = State.ERROR
             error_stopwatch = None
             processing_stopwatch = None
         elif is_meshroom_done() and is_meshroom_success():
-            print("MESHROOM SUCCESS")
+            logging.info('meshroom done successfully in ; ' + "{:.1f}".format(time.time() - processing_stopwatch) + ' ; seconds')
             state = State.MODEL_VIEW
             model_stopwatch = None
             processing_stopwatch = None
+            logging.info('copying object files to one drive...')
             copy_model_to_oneDrive(session_name, os.path.join(one_drive_path, timeString))
+            logging.info('showing model on screen')
         elif time.time() - processing_stopwatch > PROCESSING_TIMEOUT: # if got to here then meshroom is still running
-            print("PROCESSING TIMEOUT")
+            logging.error('meshroom exceeded timeout - killing process')
             state = State.ERROR
             error_stopwatch = None
             processing_stopwatch = None
@@ -216,6 +217,7 @@ while True:
             end_model_view()
             state = State.INSTRUCTIONS
             screen.blit(instructions_pic, (0, 0))
+            logging.info('ending session - returning to instructions...')
         else:
             # show the model and rotate it one degree
             rotate_model()
