@@ -15,10 +15,11 @@ from objloader import *
 
 def init_model(obj_file):
     global screen, viewport, output_directory, rx, ry, rz, zpos, obj, state
-    pygame.display.quit()
-    pygame.display.init()
-    pygame.display.set_caption("Photogrammetry")
-    screen = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF | pygame.FULLSCREEN)
+    # pygame.display.quit()
+    # pygame.display.init()
+    # pygame.display.set_caption("Photogrammetry")
+    # screen = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF | pygame.FULLSCREEN)
+    pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF | pygame.FULLSCREEN)
     glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
     glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
     glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
@@ -61,10 +62,11 @@ def rotate_model():
 
 def end_model_view():
     global screen
-    pygame.display.quit()
-    pygame.display.init()
-    pygame.display.set_caption("Photogrammetry")
-    screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+    # pygame.display.quit()
+    # pygame.display.init()
+    # pygame.display.set_caption("Photogrammetry")
+    # screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+    pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 
 pygame.display.set_caption("Photogrammetry")
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
