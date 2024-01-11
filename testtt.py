@@ -35,7 +35,10 @@ glEnable(GL_DEPTH_TEST)
 glShadeModel(GL_SMOOTH)           # most obj files expect to be smooth-shaded
 
 # LOAD OBJECT AFTER PYGAME INIT
+
 obj_file_path = r"C:\Users\mada\Documents\photogrammetry\photogrammetry_data\2024-01-11-09-12-47\output\texturedMesh.obj"
+center_object(obj_file_path)
+print("centerd object")
 obj = OBJ(obj_file_path, swapyz=True)
 obj.generate()
 
@@ -48,8 +51,7 @@ gluPerspective(70.0, width/float(height), 1, 100.0)
 glEnable(GL_DEPTH_TEST)
 glMatrixMode(GL_MODELVIEW)
 
-center_object(obj_file_path)
-print("centerd object")
+
 
 rx, ry, rz = (-90,45,0)
 zpos = -2

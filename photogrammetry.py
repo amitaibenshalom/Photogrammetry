@@ -5,6 +5,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
 from pygame.constants import *
+import shutil
 
 from consts import *
 from pictures_consts import *
@@ -28,6 +29,8 @@ def init_model(obj_file):
     glEnable(GL_COLOR_MATERIAL)
     glEnable(GL_DEPTH_TEST)
     glShadeModel(GL_SMOOTH)
+    center_object(obj_file)
+    print("centerd object")
     try:
         obj = OBJ(obj_file, swapyz=True)
         obj.generate()
@@ -41,8 +44,6 @@ def init_model(obj_file):
     gluPerspective(70.0, width/float(height), 1, 100.0)
     glEnable(GL_DEPTH_TEST)
     glMatrixMode(GL_MODELVIEW)
-    center_object(obj_file)
-    print("centerd object")
     glTranslate(0,0,zpos)
     glRotatef(ry, 0.0, 1.0, 0.0)
     glRotatef(rx, 1.0, 0.0, 0.0)
@@ -53,11 +54,11 @@ def rotate_model():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glClearColor(226/255,233/255,241/255,1.0)
     glLoadIdentity()
-    glTranslate(0,0,zpos)
     ry += 1
+    glTranslate(0,0,zpos)
     glRotatef(ry, 0.0, 1.0, 0.0)
     glRotatef(rx, 1.0, 0.0, 0.0)
-    glRotatef(rz, 0.0, 0.0, 1.0)    
+    glRotatef(rz, 0.0, 0.0, 1.0)
     obj.render()
 
 def end_model_view():
@@ -67,6 +68,22 @@ def end_model_view():
     # pygame.display.set_caption("Photogrammetry")
     # screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
     pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+
+def ignoreFunc(file):
+    def _ignore_(path, names):  
+        ignored = []
+        if file in names:
+            ignored.append(file)
+        return set(ignored)
+    return _ignore_
+
+def copy_model_to_oneDrive(session_path, drive_path):
+    # ignore cache and all the pictures except 6 (middle one)
+    # shutil.copytree(session_path, drive_path, ignore=shutil.ignore_patterns('cache','0.png','1.png','2.png','3.png','4.png','5.png','7.png','8.png','9.png', '10.png', '11.png'))
+    try:
+        shutil.copytree(session_path, drive_path, ignore=shutil.ignore_patterns('cache','0.png','1.png','2.png','3.png','4.png','5.png','7.png','8.png','9.png', '10.png', '11.png'))
+    except:
+        print("ERROR COPYING TO ONE DRIVE")
 
 pygame.display.set_caption("Photogrammetry")
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
@@ -178,6 +195,7 @@ while True:
             state = State.MODEL_VIEW
             model_stopwatch = None
             processing_stopwatch = None
+            copy_model_to_oneDrive(session_name, os.path.join(one_drive_path, timeString))
         elif time.time() - processing_stopwatch > PROCESSING_TIMEOUT: # if got to here then meshroom is still running
             print("PROCESSING TIMEOUT")
             state = State.ERROR
@@ -191,7 +209,7 @@ while True:
     if state == State.MODEL_VIEW:
         if model_stopwatch is None:
             model_stopwatch = time.time()
-            screen.blit(model_view_pic, (0, 0))
+            # screen.blit(model_view_pic, (0, 0))
             init_model(os.path.join(output_directory, obj_file_name))
         elif time.time() - model_stopwatch > MODEL_VIEW_TIME:
             model_stopwatch = None

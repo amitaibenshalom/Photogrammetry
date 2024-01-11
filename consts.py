@@ -9,9 +9,8 @@ model_number = 0
 MAX_MODEL_NUMBER = 15
 
 photogrammetry_local_data_path = r'C:\Users\mada\Documents\photogrammetry\photogrammetry_data'
+one_drive_path = r'D:\photogrammetry\OneDrive - The Bloomfield Science Museum in Jerusalem\photogrammetry_data'
 meshroom_batch_path = r'C:\Users\mada\Downloads\Meshroom-2023.2.0-win64\Meshroom-2023.2.0\meshroom_batch.exe'
-# input_directory = r"C:\Users\mada\Documents\photogrammetry\photogrammetry_data\2024-01-04-11-56-57-3854\images"
-# output_directory = r"C:\Users\mada\Documents\photogrammetry\Meshroom-Test"
 config_file = r"C:\Users\mada\Documents\photogrammetry\Meshroom-Test\settings_override"
 
 images_folder_name = "images"
@@ -20,6 +19,7 @@ cache_folder_name = "cache"
 image_format = ".png"
 texture_name = "texture_1001.png"
 obj_file_name = "texturedMesh.obj"
+# ignore_items = set('cache','0.png','1.png','2.png','3.png','4.png','5.png','7.png','8.png','9.png', '10.png', '11.png')
 
 class State(Enum):
     INSTRUCTIONS = 0
@@ -34,7 +34,7 @@ END_KEY = pygame.K_1
 MIDDLE_KEY = pygame.K_CAPSLOCK
 
 ERROR_SHOW_TIME = 8
-MODEL_VIEW_TIME = 20
+MODEL_VIEW_TIME = 15
 PROCESSING_TIMEOUT = 120
 
 pygame.init()
