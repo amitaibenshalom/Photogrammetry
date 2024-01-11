@@ -35,7 +35,7 @@ glEnable(GL_DEPTH_TEST)
 glShadeModel(GL_SMOOTH)           # most obj files expect to be smooth-shaded
 
 # LOAD OBJECT AFTER PYGAME INIT
-obj_file_path = r"C:\Users\mada\Documents\photogrammetry\photogrammetry_data\2024-01-01-10-35-52-0016\output\texturedMesh.obj"
+obj_file_path = r"C:\Users\mada\Documents\photogrammetry\photogrammetry_data\2024-01-11-09-12-47\output\texturedMesh.obj"
 obj = OBJ(obj_file_path, swapyz=True)
 obj.generate()
 
@@ -44,17 +44,27 @@ clock = pygame.time.Clock()
 glMatrixMode(GL_PROJECTION)
 glLoadIdentity()
 width, height = viewport
-gluPerspective(90.0, width/float(height), 1, 100.0)
+gluPerspective(70.0, width/float(height), 1, 100.0)
 glEnable(GL_DEPTH_TEST)
 glMatrixMode(GL_MODELVIEW)
 
-rx, ry, rz = (-90,0,0)
-tx, ty, tz = (0,0,-5)
+center_object(obj_file_path)
+print("centerd object")
+
+rx, ry, rz = (-90,45,0)
+zpos = -2
 rotate = move = False
 stopwatch = time.time()
+glTranslate(0,0,zpos)
+glRotatef(ry, 0.0, 1.0, 0.0)
+glRotatef(rx, 1.0, 0.0, 0.0)
+glRotatef(rz, 0.0, 0.0, 1.0)
+
+stopwatch = time.time()
 MAX_TIME = 10
-glTranslate(tx, ty, 0)
 while 1:
+    if time.time() - stopwatch > MAX_TIME:
+        break
     clock.tick(30)
     for e in pygame.event.get():
         if e.type == QUIT:
@@ -81,18 +91,18 @@ while 1:
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glClearColor(1,1,1,1)
     glLoadIdentity()
+    glTranslate(0,0,zpos)
 
-    # ry += 1
-    # glPushMatrix()
-    glTranslate(tx, ty, tz)
+    ry += 1
+    # glTranslate(-center_x,0,-center_z - zpos)
     # glTranslatef(0.0, 0.0, -5.0)
     # Rotate around the local Y-axis
     glRotatef(ry, 0.0, 1.0, 0.0)
     glRotatef(rx, 1.0, 0.0, 0.0)
     glRotatef(rz, 0.0, 0.0, 1.0)
 
-    ry += 1
+    # glTranslate(center_x,0,center_z + zpos)
     
     obj.render()
-    # glPopMatrix()
     pygame.display.flip()
+    # time.sleep(0.1)

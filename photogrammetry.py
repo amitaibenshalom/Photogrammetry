@@ -12,14 +12,66 @@ from run_camera import *
 from run_meshroom import *
 from objloader import *
 
-pygame.init()
+
+def init_model(obj_file):
+    global screen, viewport, output_directory, rx, ry, rz, zpos, obj, state
+    pygame.display.quit()
+    pygame.display.init()
+    pygame.display.set_caption("Photogrammetry")
+    screen = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF | pygame.FULLSCREEN)
+    glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
+    glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
+    glEnable(GL_LIGHT0)
+    glEnable(GL_LIGHTING)
+    glEnable(GL_COLOR_MATERIAL)
+    glEnable(GL_DEPTH_TEST)
+    glShadeModel(GL_SMOOTH)
+    try:
+        obj = OBJ(obj_file, swapyz=True)
+        obj.generate()
+    except:
+        print("ERROR LOADING OBJ FILE")
+        state = State.ERROR
+        return
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    width, height = viewport
+    gluPerspective(70.0, width/float(height), 1, 100.0)
+    glEnable(GL_DEPTH_TEST)
+    glMatrixMode(GL_MODELVIEW)
+    center_object(obj_file)
+    print("centerd object")
+    glTranslate(0,0,zpos)
+    glRotatef(ry, 0.0, 1.0, 0.0)
+    glRotatef(rx, 1.0, 0.0, 0.0)
+    glRotatef(rz, 0.0, 0.0, 1.0)
+
+def rotate_model():
+    global rx, ry, rz, obj, zpos
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glClearColor(226/255,233/255,241/255,1.0)
+    glLoadIdentity()
+    glTranslate(0,0,zpos)
+    ry += 1
+    glRotatef(ry, 0.0, 1.0, 0.0)
+    glRotatef(rx, 1.0, 0.0, 0.0)
+    glRotatef(rz, 0.0, 0.0, 1.0)    
+    obj.render()
+
+def end_model_view():
+    global screen
+    pygame.display.quit()
+    pygame.display.init()
+    pygame.display.set_caption("Photogrammetry")
+    screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+
 pygame.display.set_caption("Photogrammetry")
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
-screen.fill((200, 0, 100))
-pygame.display.flip()
 
 # pygame.mouse.set_visible(False)
 
+clock = pygame.time.Clock()
 state = State.INSTRUCTIONS
 session_name = "none" # default value, will be changed later
 timeString = "none"
@@ -27,9 +79,15 @@ input_directory = "none"
 output_directory = "none"
 cache_directory = "none"
 image_number = 0
+rx, ry, rz = (-90,45,0)
+zpos = -2
+obj = None
 error_stopwatch = None
 model_stopwatch = None
 processing_stopwatch = None
+
+# output_directory = r"C:\Users\mada\Documents\photogrammetry\photogrammetry_data\2024-01-11-09-12-47\output"
+# state = State.MODEL_VIEW
 
 ret = open_camera()
 if not ret:
@@ -37,8 +95,7 @@ if not ret:
     screen.blit(camera_error_pic, (0, 0))
     pygame.display.flip()
 
-while True:
-    
+while True: 
     events = pygame.event.get()
     for event in events:
         if event.type == pygame.KEYDOWN:
@@ -129,17 +186,18 @@ while True:
             screen.blit(processing_pics[(int(time.time() - processing_stopwatch)) % len(processing_pics)], (0, 0))
             pygame.display.flip()
                 
-    
     if state == State.MODEL_VIEW:
         if model_stopwatch is None:
             model_stopwatch = time.time()
             screen.blit(model_view_pic, (0, 0))
-            pygame.display.flip()
+            init_model(os.path.join(output_directory, obj_file_name))
         elif time.time() - model_stopwatch > MODEL_VIEW_TIME:
             model_stopwatch = None
+            end_model_view()
             state = State.INSTRUCTIONS
             screen.blit(instructions_pic, (0, 0))
-            pygame.display.flip()
         else:
             # show the model and rotate it one degree
-            pass
+            rotate_model()
+        clock.tick(30)
+        pygame.display.flip()

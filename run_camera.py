@@ -2,7 +2,7 @@ import os
 import cv2
 import pygame
 from consts import *
-from pictures_consts import face_pic
+from pictures_consts import face_pic, camera_size_on_screen, camera_pos, face_size
 
 cap = None
 
@@ -31,9 +31,9 @@ def run_one_frame_to_video(window):
     # Convert the frame to a Pygame surface
     pygame_frame = pygame.surfarray.make_surface(frame)
     
-
-    # add the png image of "face" on the camera frame
-    pygame_frame.blit(face_pic, (0,0))
+    # camera_size_on_screen = (640, 360)
+    # add the png image of "face" on the camera frame in the center
+    pygame_frame.blit(face_pic, ((camera_size_on_screen[0]-face_size[0])//2 ,(camera_size_on_screen[1]-face_size[1])//2))
     window.blit(pygame_frame, camera_pos)
     return True
 

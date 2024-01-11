@@ -1,6 +1,7 @@
 import os
 import pygame
 from OpenGL.GL import *
+from pywavefront import Wavefront
 
 
 class OBJ:
@@ -121,3 +122,49 @@ class OBJ:
 
     def free(self):
         glDeleteLists([self.gl_list])
+
+
+
+def get_central_axis_coordinates(obj_file_path):
+    # Load the object file
+    obj = Wavefront(obj_file_path)
+
+    # Extract vertices from the object
+    vertices = obj.vertices
+
+    # Calculate the central axis coordinates in xz-plane
+    x_coordinates = [vertex[0] for vertex in vertices]
+    z_coordinates = [vertex[2] for vertex in vertices]
+
+    # Calculate the average coordinates
+    avg_x = sum(x_coordinates) / len(x_coordinates)
+    avg_z = sum(z_coordinates) / len(z_coordinates)
+
+    # Return the coordinates in xz-plane
+    return avg_x, avg_z
+
+def center_object(file_path):
+    # Step 1: Read the object file and parse its vertices
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    vertices = []
+    for line in lines:
+        if line.startswith('v '):
+            vertex = list(map(float, line[2:].split()))
+            vertices.append(vertex)
+
+    # Step 2: Calculate the center of the object
+    center = [sum(v[i] for v in vertices) / len(vertices) for i in range(3)]
+
+    # Step 3: Translate all vertices to make the center (0, 0, 0)
+    translated_vertices = [[v[i] - center[i] for i in range(3)] for v in vertices]
+
+    # Step 4: Write the modified vertices back to the object file
+    with open(file_path, 'w') as file:
+        for line in lines:
+            if line.startswith('v '):
+                vertex = translated_vertices.pop(0)
+                file.write(f'v {vertex[0]} {vertex[1]} {vertex[2]}\n')
+            else:
+                file.write(line)

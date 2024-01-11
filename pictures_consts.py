@@ -1,4 +1,5 @@
 import pygame
+from consts import *
 
 instructions_pic = pygame.image.load("pictures/instructions_pic.jpg")
 taking_pictures_pic = pygame.image.load("pictures/red_dot.jpg")
@@ -11,14 +12,15 @@ error_pic = pygame.image.load("pictures/error_pic.jpg")
 camera_error_pic = pygame.image.load("pictures/camera_error_pic.png")
 face_pic = pygame.image.load("pictures/face_pic.png")
 
-instructions_pic = pygame.transform.scale(instructions_pic, (1920, 1080))
-taking_pictures_pic = pygame.transform.scale(taking_pictures_pic, (1920, 1080))
-processing_pic0 = pygame.transform.scale(processing_pic0, (1920, 1080))
-processing_pic1 = pygame.transform.scale(processing_pic1, (1920, 1080))
-processing_pic2 = pygame.transform.scale(processing_pic2, (1920, 1080))
-processing_pic3 = pygame.transform.scale(processing_pic3, (1920, 1080))
-model_view_pic = pygame.transform.scale(model_view_pic, (1920, 1080))
-error_pic = pygame.transform.scale(error_pic, (1920, 1080))
-camera_error_pic = pygame.transform.scale(camera_error_pic, (1920, 1080))
+instructions_pic = pygame.transform.scale(instructions_pic, viewport)
+taking_pictures_pic = pygame.transform.scale(taking_pictures_pic, viewport)
+processing_pic0 = pygame.transform.scale(processing_pic0, viewport)
+processing_pic1 = pygame.transform.scale(processing_pic1, viewport)
+processing_pic2 = pygame.transform.scale(processing_pic2, viewport)
+processing_pic3 = pygame.transform.scale(processing_pic3, viewport)
+model_view_pic = pygame.transform.scale(model_view_pic, viewport)
+error_pic = pygame.transform.scale(error_pic, viewport)
+camera_error_pic = pygame.transform.scale(camera_error_pic, viewport)
+face_pic = pygame.transform.scale(face_pic, face_size)
 
 processing_pics = [processing_pic0, processing_pic1, processing_pic2, processing_pic3]
