@@ -93,7 +93,7 @@ def prev(obj, ename):
 
 
 while (True):
-    # hide_taskbar()
+    hide_taskbar()
     plt = Plotter(size=("f","f"))
     bu = plt.add_button(
         next,
