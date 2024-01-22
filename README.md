@@ -10,7 +10,7 @@ Directory **"main"**: python code for generating the object and texture files us
 - **pictures** - sub directory containing all screen pictures for every state.
 - **pictures_consts.py** - consts for pictures 
 
-Directory **"outside_screen"**: python code for viewing the object files via "Vedo" library.
+Directory **"outside_screen"**: python code for viewing the object files from the oneDrive folder via "Vedo" library.
 - **main.py** - main code running Vedo.
 - **consts.py** - consts file.
 
