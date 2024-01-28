@@ -1,0 +1,6 @@
+pygame
+vedo
+opencv-python
+pywavefront
+PyOpenGL
+pywin32

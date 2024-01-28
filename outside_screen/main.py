@@ -1,9 +1,4 @@
-# from basic_functions import *
-# import time
-
-# show first model - the rest will be shown by the buttons
 import time
-
 import vedo
 from vedo import *
 import os
@@ -42,24 +37,16 @@ def next(obj, ename):
         model_number = min(MAX_MODEL_NUMBER-1, len(os.listdir(photogrammetry_data_path)) - 1)
     plt.clear()
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
+    if (not os.path.exists(obj_file_path)) or (not os.path.exists(texture_file_path)):
+        model_number -= 1
+        if model_number < 0:
+            model_number = min(MAX_MODEL_NUMBER-1, len(os.listdir(photogrammetry_data_path)) - 1)
+        obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
-    # plt.break_interaction()
     plt.add(mesh)
     plt.reset_camera()
     plt.reset_viewup()
-    # while True:
-    #     try:
-    #         obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-    #         mesh = Mesh(obj_file_path)
-    #         mesh.texture(texture_file_path, scale=0.1)
-    #         # plt.break_interaction()
-    #         plt.add(mesh)
-    #         plt.reset_camera()
-    #         plt.reset_viewup()
-    #         break
-    #     except:
-    #         time.sleep(1)
 
 
 def prev(obj, ename):
@@ -70,31 +57,21 @@ def prev(obj, ename):
         model_number = 0
     plt.clear()
     obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
+    if (not os.path.exists(obj_file_path)) or (not os.path.exists(texture_file_path)):
+        model_number += 1
+        if model_number >= MAX_MODEL_NUMBER or model_number >= len(os.listdir(photogrammetry_data_path)):
+            model_number = 0
+        obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
     mesh = Mesh(obj_file_path)
     mesh.texture(texture_file_path, scale=0.1)
-    # plt.break_interaction()
     plt.add(mesh)
     plt.reset_camera()
     plt.reset_viewup()
 
-    # while True:
-    #     try:
-    #         obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-    #         mesh = Mesh(obj_file_path)
-    #         mesh.texture(texture_file_path, scale=0.1)
-    #         # plt.break_interaction()
-    #         plt.add(mesh)
-    #         plt.reset_camera()
-    #         plt.reset_viewup()
-    #         break
-    #     except:
-    #         time.sleep(1)
-
-
 
 while (True):
-    hide_taskbar()
-    plt = Plotter(size=("f","f"))
+    # hide_taskbar()
+    plt = Plotter(size="fullscreen")
     bu = plt.add_button(
         next,
         pos=(0.9, 0.15),  # x,y fraction from bottom left corner
@@ -118,13 +95,10 @@ while (True):
         italic=False,  # non-italic font style
     )
     model_number = 0
-    # pic = Image("pictures\left_arrow.png")
-    # # pic.resize((200,0))
-    # pic = pic.clone2d(pos=(0.8,0.15),scale=0.1)
     try :    
         obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
         mesh = Mesh(obj_file_path)
         mesh.texture(texture_file_path, scale=0.1)
-        plt.show(mesh, __doc__,size=("f","f")).close()
+        plt.show(mesh, __doc__,size="fullscreen").close()
     except:
         pass
