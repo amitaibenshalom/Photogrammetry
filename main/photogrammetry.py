@@ -81,7 +81,7 @@ def copy_model_to_oneDrive(session_path, drive_path):
     # ignore cache and all the pictures except 6 (middle one)
     # shutil.copytree(session_path, drive_path, ignore=shutil.ignore_patterns('cache','0.png','1.png','2.png','3.png','4.png','5.png','7.png','8.png','9.png', '10.png', '11.png'))
     try:
-        shutil.copytree(session_path, drive_path, ignore=shutil.ignore_patterns('cache','0.png','1.png','2.png','3.png','4.png','5.png','7.png','8.png','9.png', '10.png', '11.png'))
+        shutil.copytree(session_path, drive_path, ignore=shutil.ignore_patterns('cache','images'))
     except:
         print("ERROR COPYING TO ONE DRIVE")
         logging.critical('ERROR WHILE COPYING TO ONE DRIVE')
@@ -174,7 +174,10 @@ while True:
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == MIDDLE_KEY:
                 print("taking picture " + str(image_number))
-                ret = take_picture(input_directory, str(image_number) + image_format)
+                if image_number != 6:
+                    ret = take_picture(input_directory, str(image_number) + image_format)
+                else:
+                    ret = take_picture(input_directory, str(image_number) + image_format, save_to_images_folder=True, timestamp=timeString)
                 if not ret:
                     print("ERROR TAKING PICTURE " + str(image_number))
                     logging.critical('ERROR TAKING PICTURE ' + str(image_number))

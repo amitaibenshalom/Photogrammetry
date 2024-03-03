@@ -38,7 +38,7 @@ def run_one_frame_to_video(window):
     return True
 
 
-def take_picture(image_folder, image_name):
+def take_picture(image_folder, image_name, save_to_images_folder=False, timestamp=None):
     # take a picture and save it in the images folder
     global cap
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_width)
@@ -48,4 +48,8 @@ def take_picture(image_folder, image_name):
         print("Can't receive frame (stream end?)")
         return False
     cv2.imwrite(os.path.join(image_folder, image_name), frame)
+    if save_to_images_folder and timestamp is not None:
+        if not os.path.exists(photogrammetry_local_images_path):
+            os.makedirs(photogrammetry_local_images_path, exist_ok=True)
+        cv2.imwrite(os.path.join(photogrammetry_local_images_path, timestamp + image_format), frame)
     return True
