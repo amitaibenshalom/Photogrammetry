@@ -196,6 +196,7 @@ while True:
             last_timer = processing_stopwatch
             screen.blit(processing_pic0, (0, 0))
             timer = 0
+            max_timer_index = 0
             display_timer(timer, timers[max_timer_index])
             pygame.display.flip()
             # input_directory = "C:/Users/mada/Documents/photogrammetry/photogrammetry_data/2024-01-04-11-56-57-3854/images"  # for testing
