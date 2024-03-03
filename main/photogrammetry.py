@@ -67,12 +67,12 @@ def end_model_view():
     # pygame.display.init()
     pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 
-def display_timer(time):
+def display_timer(time, max_time):
     global font, screen, viewport
-    timer_str = f"00:{time:02d}"
+    timer_str = f"00:{(max_time-time):02d}"
     text_size = font.size(timer_str)
     text_x = (viewport[0] - text_size[0]) // 2
-    text_y = viewport[1] * 3 // 4
+    text_y = viewport[1] // 4
     text = font.render(timer_str, True, (0, 0, 0))
     screen.blit(text, (text_x, text_y))
 
@@ -92,7 +92,7 @@ def init_log(log_file_path):
 
 pygame.display.set_caption("Photogrammetry")
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
-font = pygame.font.Font(None, 36)
+font = pygame.font.Font(None, 100)
 # pygame.mouse.set_visible(False)
 
 clock = pygame.time.Clock()
@@ -112,6 +112,7 @@ processing_stopwatch = None
 timer = None
 timers = [50,20]  # fake times to be displayed in timer for processing model state
 max_timer_index = 0
+last_timer = 0
 
 ret = open_camera()
 if not ret:
@@ -189,6 +190,7 @@ while True:
     if state == State.PROCESSING:
         if processing_stopwatch is None:
             processing_stopwatch = time.time()
+            last_timer = processing_stopwatch
             screen.blit(processing_pic0, (0, 0))
             timer = 0
             display_timer(timer, timers[max_timer_index])
@@ -220,9 +222,11 @@ while True:
             terminate_meshroom()
         else:
             screen.blit(processing_pics[(int(time.time() - processing_stopwatch)) % len(processing_pics)], (0, 0))
-            timer = (int(time.time() - processing_stopwatch))
+            timer = (int(time.time() - last_timer))
             if timer > timers[max_timer_index] - 5:
                 max_timer_index += 1
+                timer = 0
+                last_timer = time.time()
                 if max_timer_index >= len(timers):
                     max_timer_index = len(timers) - 1
             display_timer(timer, timers[max_timer_index])
