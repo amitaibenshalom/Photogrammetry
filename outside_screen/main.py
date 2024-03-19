@@ -3,15 +3,6 @@ import vedo
 from vedo import *
 import os
 from consts import *
-import win32gui
-import win32con
-
-
-def hide_taskbar():
-    win32gui.ShowWindow(win32gui.FindWindow("Shell_TrayWnd", None), win32con.SW_HIDE)
-
-def restore_taskbar():
-    win32gui.ShowWindow(win32gui.FindWindow("Shell_TrayWnd", None), win32con.SW_RESTORE)
 
 
 def get_last_obj(path):
@@ -70,7 +61,6 @@ def prev(obj, ename):
 
 
 while (True):
-    # hide_taskbar()
     plt = Plotter(size="fullscreen")
     bu = plt.add_button(
         next,
