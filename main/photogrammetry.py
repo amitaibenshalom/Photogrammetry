@@ -189,7 +189,6 @@ while True:
                 state = State.PROCESSING
                 logging.info('processing...')
 
-
     if state == State.PROCESSING:
         if processing_stopwatch is None:
             processing_stopwatch = time.time()
