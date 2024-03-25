@@ -78,8 +78,7 @@ def display_timer(time, max_time):
 
 
 def copy_model_to_oneDrive(session_path, drive_path):
-    # ignore cache and all the pictures except 6 (middle one)
-    # shutil.copytree(session_path, drive_path, ignore=shutil.ignore_patterns('cache','0.png','1.png','2.png','3.png','4.png','5.png','7.png','8.png','9.png', '10.png', '11.png'))
+    # ignore cache and images folders
     try:
         shutil.copytree(session_path, drive_path, ignore=shutil.ignore_patterns('cache','images'))
     except:
