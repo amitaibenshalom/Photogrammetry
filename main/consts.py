@@ -3,7 +3,8 @@ import pygame
 
 photogrammetry_local_data_path = r'C:\Users\mada\Documents\photogrammetry\photogrammetry_data'
 photogrammetry_local_images_path = r'C:\Users\mada\Documents\photogrammetry\photogrammetry_images'
-one_drive_path = r'D:\photogrammetry\OneDrive - The Bloomfield Science Museum in Jerusalem\photogrammetry_data'
+photogrammetry_drive_data_path = r'Z:\photogrammetry\photogrammetry_data'
+photogrammetry_drive_images_path = r'Z:\photogrammetry\photogrammetry_images'
 meshroom_batch_path = r'C:\Users\mada\Downloads\Meshroom-2023.2.0-win64\Meshroom-2023.2.0\meshroom_batch.exe'
 config_file = r"C:\Users\mada\Documents\photogrammetry\Photogrammetry\main\settings_override"
 
