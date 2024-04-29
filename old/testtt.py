@@ -1,110 +1,86 @@
-#!/usr/bin/env python
-# Basic OBJ file viewer. needs objloader from:
-#  http://www.pygame.org/wiki/OBJFileLoader
-# LMB + move: rotate
-# RMB + move: pan
-# Scroll wheel: zoom in/out
-import sys, pygame
+import pygame
 from pygame.locals import *
-from pygame.constants import *
 from OpenGL.GL import *
+from OpenGL.GLUT import *
 from OpenGL.GLU import *
-import time
+import numpy as np
+from PIL import Image
 
-# IMPORT OBJECT LOADER
-from objloader import *
+def load_texture(filename):
+    image = pygame.image.load(filename)
+    texture_data = pygame.image.tostring(image, "RGB", 1)
+    texture_width, texture_height = image.get_width(), image.get_height()
 
-pygame.init()
-screen_info = pygame.display.Info()
-viewport = (screen_info.current_w,screen_info.current_h)
+    texture_id = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_width, texture_height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data)
 
-# open a window in fullscreen mode with opengl enabled and pink background
-pygame.display.set_caption("Photogrammetry")
-screen = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF | pygame.FULLSCREEN)
-screen.fill((200, 0, 100))
-pygame.display.flip()
+    return texture_id, texture_width, texture_height
 
-
-glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
-glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
-glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
-glEnable(GL_LIGHT0)
-glEnable(GL_LIGHTING)
-glEnable(GL_COLOR_MATERIAL)
-glEnable(GL_DEPTH_TEST)
-glShadeModel(GL_SMOOTH)           # most obj files expect to be smooth-shaded
-
-# LOAD OBJECT AFTER PYGAME INIT
-
-obj_file_path = r"C:\Users\mada\Documents\photogrammetry\photogrammetry_data\2024-01-11-09-12-47\output\texturedMesh.obj"
-center_object(obj_file_path)
-print("centerd object")
-obj = OBJ(obj_file_path, swapyz=True)
-obj.generate()
-
-clock = pygame.time.Clock()
-
-glMatrixMode(GL_PROJECTION)
-glLoadIdentity()
-width, height = viewport
-gluPerspective(70.0, width/float(height), 1, 100.0)
-glEnable(GL_DEPTH_TEST)
-glMatrixMode(GL_MODELVIEW)
-
-
-
-rx, ry, rz = (-90,45,0)
-zpos = -2
-rotate = move = False
-stopwatch = time.time()
-glTranslate(0,0,zpos)
-glRotatef(ry, 0.0, 1.0, 0.0)
-glRotatef(rx, 1.0, 0.0, 0.0)
-glRotatef(rz, 0.0, 0.0, 1.0)
-
-stopwatch = time.time()
-MAX_TIME = 10
-while 1:
-    if time.time() - stopwatch > MAX_TIME:
-        break
-    clock.tick(30)
-    for e in pygame.event.get():
-        if e.type == QUIT:
-            sys.exit()
-        elif e.type == KEYDOWN and e.key == K_ESCAPE:
-            sys.exit()
-        # elif e.type == MOUSEBUTTONDOWN:
-        #     if e.button == 4: zpos -= 1
-        #     elif e.button == 5: zpos += 1
-        #     elif e.button == 1: rotate = True
-        #     elif e.button == 3: move = True
-        # elif e.type == MOUSEBUTTONUP:
-        #     if e.button == 1: rotate = False
-        #     elif e.button == 3: move = False
-        # elif e.type == MOUSEMOTION:
-        #     i, j = e.rel
-        #     if rotate:
-        #         rx += i
-        #         ry += j
-        #     if move:
-        #         tx += i
-        #         ty -= j
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glClearColor(1,1,1,1)
-    glLoadIdentity()
-    glTranslate(0,0,zpos)
-
-    ry += 1
-    # glTranslate(-center_x,0,-center_z - zpos)
-    # glTranslatef(0.0, 0.0, -5.0)
-    # Rotate around the local Y-axis
-    glRotatef(ry, 0.0, 1.0, 0.0)
-    glRotatef(rx, 1.0, 0.0, 0.0)
-    glRotatef(rz, 0.0, 0.0, 1.0)
-
-    # glTranslate(center_x,0,center_z + zpos)
+def draw_background(texture_id, screen_width, screen_height, texture_width, texture_height):
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
     
-    obj.render()
-    pygame.display.flip()
-    # time.sleep(0.1)
+    # Calculate aspect ratio of the screen and the texture
+    screen_aspect_ratio = screen_width / screen_height
+    texture_aspect_ratio = texture_width / texture_height
+    
+    # Adjust texture coordinates to cover the entire screen
+    if screen_aspect_ratio > texture_aspect_ratio:
+        # Screen is wider than texture, adjust vertically
+        tex_width_scaled = screen_aspect_ratio / texture_aspect_ratio
+        glTexCoord2f(0, 0)
+        glVertex3f(-tex_width_scaled, -1, 0)
+        glTexCoord2f(1, 0)
+        glVertex3f(tex_width_scaled, -1, 0)
+        glTexCoord2f(1, 1)
+        glVertex3f(tex_width_scaled, 1, 0)
+        glTexCoord2f(0, 1)
+        glVertex3f(-tex_width_scaled, 1, 0)
+    else:
+        # Screen is taller than texture, adjust horizontally
+        tex_height_scaled = texture_aspect_ratio / screen_aspect_ratio
+        glTexCoord2f(0, 0)
+        glVertex3f(-1, -tex_height_scaled, 0)
+        glTexCoord2f(1, 0)
+        glVertex3f(1, -tex_height_scaled, 0)
+        glTexCoord2f(1, 1)
+        glVertex3f(1, tex_height_scaled, 0)
+        glTexCoord2f(0, 1)
+        glVertex3f(-1, tex_height_scaled, 0)
+    
+    glEnd()
+    glDisable(GL_TEXTURE_2D)
+
+def main():
+    pygame.init()
+    display_info = pygame.display.Info()
+    display = (display_info.current_w, display_info.current_h)
+    pygame.display.set_mode(display, DOUBLEBUF | OPENGL | FULLSCREEN)
+    screen_width, screen_height = display_info.current_w, display_info.current_h
+    gluPerspective(45, (screen_width / screen_height), 0.1, 50.0)
+    glTranslatef(0.0, 0.0, -5)
+
+    # Load the background image as a texture
+    background_texture, texture_width, texture_height = load_texture(r"D:\Amitai_D\museum\photogrammetria\tamar pictures\amitai\2023-08-28-110536.jpg")
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        
+        # Draw the background
+        draw_background(background_texture, screen_width, screen_height, texture_width, texture_height)
+
+        # Add your 3D model rendering code here
+        
+        pygame.display.flip()
+        pygame.time.wait(10)
+
+if __name__ == "__main__":
+    main()

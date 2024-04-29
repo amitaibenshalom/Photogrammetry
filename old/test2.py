@@ -11,8 +11,8 @@ from consts import *
 
 def init_model(obj_file):
     global viewport, output_directory, rx, ry, rz, zpos, obj, state
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glClearColor(226/255,233/255,241/255,1.0)
+    # glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    # glClearColor(226/255,233/255,241/255,1.0)
     glLoadIdentity()
 
     center_object(obj_file)
@@ -28,24 +28,24 @@ def init_model(obj_file):
     glRotatef(ry, 0.0, 1.0, 0.0)
     glRotatef(rx, 1.0, 0.0, 0.0)
     glRotatef(rz, 0.0, 0.0, 1.0)
-    obj.render()
+    # obj.render()
 
 def rotate_model():
     global rx, ry, rz, obj, zpos
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glClearColor(226/255,233/255,241/255,1.0)
+    # glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    # glClearColor(226/255,233/255,241/255,1.0)
     glLoadIdentity()
     ry += 1
     glTranslate(0,0,zpos)
     glRotatef(ry, 0.0, 1.0, 0.0)
     glRotatef(rx, 1.0, 0.0, 0.0)
     glRotatef(rz, 0.0, 0.0, 1.0)
-    obj.render()
+    # obj.render()
 
 def render_model():
     global rx, ry, rz, obj, zpos
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glClearColor(226/255,233/255,241/255,1.0)
+    # glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    # glClearColor(226/255,233/255,241/255,1.0)
     glLoadIdentity()
     glTranslate(0,0,zpos)
     glRotatef(ry, 0.0, 1.0, 0.0)
@@ -94,6 +94,8 @@ glEnable(GL_LIGHTING)
 glEnable(GL_COLOR_MATERIAL)
 glEnable(GL_DEPTH_TEST)
 glShadeModel(GL_SMOOTH)
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+glClearColor(226/255,233/255,241/255,1.0)
 
 # image_path = "D:\Amitai_D\museum\photogrammetria\Photogrammetry\outside_screen\pictures\loading.png" 
 # image_surface = pygame.image.load(image_path)
@@ -121,17 +123,16 @@ obj = None
 last_touch = time.time()
 time_to_idle = 10
 idle = False
+on_button = False
 
 obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
 print(f"model path: {obj_file_path}")
 init_model(obj_file_path)
-# Render the fixed line
+# Render the fixed borders
 glPushMatrix()  # Save the current matrix
 glLoadIdentity()  # Reset the matrix to identity
 render_border()
 glPopMatrix()  # Restore the previous matrix
-# Apply transformations to the 3D model
-glRotatef(1, 3, 1, 1)  # Example rotation (replace with your model rotation)
 render_model()  # Render the 3D model
 
 
@@ -201,21 +202,14 @@ while running:
             idle = False
             if event.buttons[0]:
                 x, y = event.rel
-                rx -= y * 0.3
-                ry += x * 0.3
+                if borders[0] * width < event.pos[0] < (1 - borders[0]) * width and borders[1] * height < event.pos[1] < (1 - borders[1]) * height: 
+                    rx -= y * 0.3
+                    ry += x * 0.3
         elif event.type == MOUSEWHEEL:
             # zpos += event.y
             pass
 
-    if time.time() - last_touch > time_to_idle:
-        idle = True
-    if idle:
-        rotate_model()
-        rx = -90
-    else:
-        render_model()
-        pass
-
+   
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glClearColor(226/255,233/255,241/255,1.0)
 
@@ -224,10 +218,14 @@ while running:
     glLoadIdentity()  # Reset the matrix to identity
     render_border()
     glPopMatrix()  # Restore the previous matrix
-    # Apply transformations to the 3D model
-    glRotatef(1, 3, 1, 1)  # Example rotation (replace with your model rotation)
-    render_model()  # Render the 3D model
-
+    
+    if time.time() - last_touch > time_to_idle:
+        idle = True
+    if idle:
+        rotate_model()
+        rx = -90
+    
+    render_model()
 
     # render_model()
     # render_border()
