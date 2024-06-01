@@ -7,6 +7,8 @@ from pygame.locals import *
 from pygame.constants import *
 from objloader import *
 from consts import *
+import numpy as np
+from PIL import Image
 
 
 def init_model(obj_file):
@@ -14,16 +16,10 @@ def init_model(obj_file):
     # glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     # glClearColor(226/255,233/255,241/255,1.0)
     glLoadIdentity()
-
     center_object(obj_file)
     obj = OBJ(obj_file, swapyz=True)
     obj.generate()
-    glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    width, height = viewport
-    gluPerspective(70.0, width/float(height), 1, 100.0)
-    glEnable(GL_DEPTH_TEST)
-    glMatrixMode(GL_MODELVIEW)
     glTranslate(0,0,zpos)
     glRotatef(ry, 0.0, 1.0, 0.0)
     glRotatef(rx, 1.0, 0.0, 0.0)
@@ -53,17 +49,31 @@ def render_model():
     glRotatef(rz, 0.0, 0.0, 1.0)
     obj.render()
 
-def draw_line(vertices):
-    glColor3f(1.0, 0.0, 0.0)
-    glBegin(GL_LINE_STRIP)
-    for vertex in vertices:
-        glVertex2f(*vertex)
-    glColor3f(1.0, 1.0, 1.0)
-    glEnd()
 
-def render_border():
-    global line_vertices
-    draw_line(line_vertices)
+def load_texture(filename):
+    image = Image.open(filename)
+    image_data = np.array(list(image.getdata()), np.uint8)
+    texture_id = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data)
+    return texture_id
+
+def draw_background(texture_id):
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glBegin(GL_QUADS)
+    glTexCoord2f(0, 0)
+    glVertex3f(-1, -1, -1)
+    glTexCoord2f(1, 0)
+    glVertex3f(1, -1, -1)
+    glTexCoord2f(1, 1)
+    glVertex3f(1, 1, -1)
+    glTexCoord2f(0, 1)
+    glVertex3f(-1, 1, -1)
+    glEnd()
+    glDisable(GL_TEXTURE_2D)
 
 def get_nth_obj_in_folder(folder_path, n):
     items = os.listdir(folder_path)
@@ -86,6 +96,10 @@ line_vertices = [(2*borders[0]-1, 2*borders[1]-1), (2*borders[0]-1, 1-2*borders[
 
 
 screen = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF | pygame.FULLSCREEN)
+gluPerspective(70.0, width/float(height), 1, 100.0)
+glMatrixMode(GL_PROJECTION)
+glEnable(GL_DEPTH_TEST)
+glMatrixMode(GL_MODELVIEW)
 glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
 glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
 glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
@@ -97,22 +111,9 @@ glShadeModel(GL_SMOOTH)
 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 glClearColor(226/255,233/255,241/255,1.0)
 
-# image_path = "D:\Amitai_D\museum\photogrammetria\Photogrammetry\outside_screen\pictures\loading.png" 
-# image_surface = pygame.image.load(image_path)
-# image_data = pygame.image.tostring(image_surface, "RGBA", 1)
-
-# Create an OpenGL texture
-# texture = glGenTextures(1)
-# glBindTexture(GL_TEXTURE_2D, texture)
-# glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-# glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-# glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_surface.get_width(), image_surface.get_height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data)
-
 glViewport(0, 0, width, height)
-glMatrixMode(GL_PROJECTION)
 glLoadIdentity()
 glOrtho(0, width, height, 0, -1, 1)
-glMatrixMode(GL_MODELVIEW)
 glLoadIdentity()
 
 clock = pygame.time.Clock()
@@ -124,17 +125,11 @@ last_touch = time.time()
 time_to_idle = 10
 idle = False
 on_button = False
+background_texture = load_texture(r"D:\Amitai_D\museum\photogrammetria\tamar pictures\amitai\2023-08-28-110536.jpg")
 
 obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
 print(f"model path: {obj_file_path}")
 init_model(obj_file_path)
-# Render the fixed borders
-glPushMatrix()  # Save the current matrix
-glLoadIdentity()  # Reset the matrix to identity
-render_border()
-glPopMatrix()  # Restore the previous matrix
-render_model()  # Render the 3D model
-
 
 running = True
 while running:
@@ -208,17 +203,16 @@ while running:
         elif event.type == MOUSEWHEEL:
             # zpos += event.y
             pass
-
-   
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glClearColor(226/255,233/255,241/255,1.0)
 
-    # Render the fixed line
-    glPushMatrix()  # Save the current matrix
-    glLoadIdentity()  # Reset the matrix to identity
-    render_border()
-    glPopMatrix()  # Restore the previous matrix
-    
+    # Draw the background
+    glPushMatrix()
+    glLoadIdentity()
+    draw_background(background_texture)
+    glPopMatrix()
+
     if time.time() - last_touch > time_to_idle:
         idle = True
     if idle:
