@@ -2,7 +2,7 @@ import pygame
 import os
 from consts import *
 
-pictures_path = r'C:\Users\mada\Documents\photogrammetry\Photogrammetry\main\pictures'
+pictures_path = r'/home/mada/Photogrammetry/main/pictures'
 instructions_pic = pygame.image.load(os.path.join(pictures_path, "instructions_pic.jpg"))
 taking_pictures_pic = pygame.image.load(os.path.join(pictures_path, "red_dot.jpg"))
 processing_pic0 = pygame.image.load(os.path.join(pictures_path, "processing_pic0.jpg"))
