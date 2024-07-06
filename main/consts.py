@@ -1,12 +1,12 @@
 from enum import Enum
 import pygame
 
-photogrammetry_local_data_path = r'C:\Users\mada\Documents\photogrammetry\photogrammetry_data'
-photogrammetry_local_images_path = r'C:\Users\mada\Documents\photogrammetry\photogrammetry_images'
-photogrammetry_drive_data_path = r'Z:\photogrammetry\photogrammetry_data'
-photogrammetry_drive_images_path = r'Z:\photogrammetry\photogrammetry_images'
-meshroom_batch_path = r'C:\Users\mada\Downloads\Meshroom-2023.2.0-win64\Meshroom-2023.2.0\meshroom_batch.exe'
-config_file = r"C:\Users\mada\Documents\photogrammetry\Photogrammetry\main\settings_override"
+photogrammetry_local_data_path = r'/home/mada/photogrammetry_data'
+photogrammetry_local_images_path = r'/home/mada/photogrammetry_images'
+photogrammetry_drive_data_path = r'/home/mada/photogrammetry_shared_folder/photogrammetry_data'  # NOT WORKING YET
+photogrammetry_drive_images_path = r'/home/mada/photogrammetry_shared_folder/photogrammetry_images'  # NOT WORKING YET
+meshroom_batch_path = r'/home/mada/Meshroom-2023.3.0/meshroom_batch'
+config_file = r"/home/mada/Photogrammetry/main/settings_override"
 
 images_folder_name = "images"
 output_folder_name = "output"
