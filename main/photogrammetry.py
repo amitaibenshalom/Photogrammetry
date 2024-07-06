@@ -214,7 +214,7 @@ while True:
             model_stopwatch = None
             processing_stopwatch = None
             logging.info('copying object files to one drive...')
-            copy_model_to_oneDrive(session_name, os.path.join(photogrammetry_drive_data_path, timeString))
+            # copy_model_to_oneDrive(session_name, os.path.join(photogrammetry_drive_data_path, timeString))
             logging.info('showing model on screen')
         elif time.time() - processing_stopwatch > PROCESSING_TIMEOUT: # if got to here then meshroom is still running
             logging.error('meshroom exceeded timeout - killing process')
