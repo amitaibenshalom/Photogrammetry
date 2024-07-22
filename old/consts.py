@@ -1,6 +1,5 @@
 
-photogrammetry_data_path = r'C:\Users\amita\OneDrive - The Bloomfield Science Museum in Jerusalem\photogrammetry_data'
-photogrammetry_data_path = r'D:\Amitai_D\museum\photogrammetria\tests\photogrammetry_data_demo'
+photogrammetry_data_path = r'/mnt/shared_in/photogrammetry_data'
 obj_path = r'output/texturedMesh.obj'  # DO NOT CHANGE
 texture_path = r'output/texture_1001.png'  # DO NOT CHANGE
 

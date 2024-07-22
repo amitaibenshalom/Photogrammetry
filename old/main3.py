@@ -125,7 +125,7 @@ while running:
                 running = False
                 break
 
-            if event.key == K_RIGHT:
+            if event.key == K_r:
                 model_number += 1
                 if model_number >= MAX_MODEL_NUMBER or model_number >= len(os.listdir(photogrammetry_data_path)):
                     model_number = 0
@@ -133,7 +133,7 @@ while running:
                 # print(f"model path: {obj_file_path}")
                 init_model(obj_file_path)
 
-            if event.key == K_LEFT:
+            if event.key == K_l:
                 model_number -= 1
                 if model_number < 0:
                     model_number = min(MAX_MODEL_NUMBER-1, len(os.listdir(photogrammetry_data_path)) - 1)
@@ -172,6 +172,7 @@ while running:
     if files_in_data_folder != os.listdir(photogrammetry_data_path):
         files_in_data_folder = os.listdir(photogrammetry_data_path)
         model_number = 0
+        time.sleep(2)
         obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
         init_model(obj_file_path)
     
