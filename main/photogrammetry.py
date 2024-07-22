@@ -21,12 +21,12 @@ def init_model(obj_file):
     # pygame.display.set_caption("Photogrammetry")
     # screen = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF | pygame.FULLSCREEN)
     pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF | pygame.FULLSCREEN)
-    glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
-    glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
-    glEnable(GL_LIGHT0)
-    glEnable(GL_LIGHTING)
-    glEnable(GL_COLOR_MATERIAL)
+    # glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
+    # glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+    # glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
+    # glEnable(GL_LIGHT0)
+    # glEnable(GL_LIGHTING)
+    # glEnable(GL_COLOR_MATERIAL)
     glEnable(GL_DEPTH_TEST)
     glShadeModel(GL_SMOOTH)
     center_object(obj_file)
@@ -80,7 +80,12 @@ def display_timer(time, max_time):
 def copy_model_to_oneDrive(session_path, drive_path):
     # ignore cache and images folders
     try:
-        shutil.copytree(session_path, drive_path, ignore=shutil.ignore_patterns('cache','images'))
+        shutil.copytree(session_path, drive_path, ignore=shutil.ignore_patterns('cache','images','log.txt'))
+        # get basename of session path
+        session_name = os.path.basename(session_path)
+        # copy picture 6 to drive under photogrammetry_drive_images_path/session_name.png
+        shutil.copyfile(os.path.join(session_path, images_folder_name, "6" + image_format), os.path.join(photogrammetry_drive_images_path, session_name + image_format))
+
     except:
         print("ERROR COPYING TO ONE DRIVE")
         logging.critical('ERROR WHILE COPYING TO ONE DRIVE')
@@ -130,6 +135,10 @@ while True:
     if state == State.CAMERA_ERROR:
         screen.blit(camera_error_pic, (0, 0))
         pygame.display.flip()
+        time.sleep(2)
+        ret = open_camera()
+        if ret:
+            state = State.INSTRUCTIONS
         continue
 
     if state == State.ERROR:
@@ -173,6 +182,7 @@ while True:
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == MIDDLE_KEY:
                 print("taking picture " + str(image_number))
+                # ret = take_picture(input_directory, str(image_number) + image_format)
                 if image_number != 6:
                     ret = take_picture(input_directory, str(image_number) + image_format)
                 else:
@@ -197,7 +207,7 @@ while True:
             max_timer_index = 0
             display_timer(timer, timers[max_timer_index])
             pygame.display.flip()
-            # input_directory = "C:/Users/mada/Documents/photogrammetry/photogrammetry_data/2024-01-04-11-56-57-3854/images"  # for testing
+            # input_directory = "put here path of images for testing"  # for testing
             ret = run_meshroom(input_directory, output_directory, cache_directory)
             if not ret:
                 logging.critical('ERROR WHILE STARTING MESHROOM PROCESS')
@@ -214,7 +224,9 @@ while True:
             model_stopwatch = None
             processing_stopwatch = None
             logging.info('copying object files to one drive...')
-            # copy_model_to_oneDrive(session_name, os.path.join(photogrammetry_drive_data_path, timeString))
+            copy_model_to_oneDrive(session_name, os.path.join(photogrammetry_drive_data_path, timeString))
+            print("deleting cache...")
+            shutil.rmtree(cache_directory, ignore_errors=True, onerror=None)
             logging.info('showing model on screen')
         elif time.time() - processing_stopwatch > PROCESSING_TIMEOUT: # if got to here then meshroom is still running
             logging.error('meshroom exceeded timeout - killing process')
