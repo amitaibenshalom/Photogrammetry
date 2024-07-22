@@ -1,27 +1,7 @@
 
-__pycache__/consts.cpython-311.pyc
+__pycache__/
 
-__pycache__/basic_functions.cpython-311.pyc
-
-__pycache__/objloader.cpython-311.pyc
-
-__pycache__/pictures_consts.cpython-311.pyc
-
-__pycache__/run_camera.cpython-311.pyc
-
-__pycache__/run_meshroom.cpython-311.pyc
-
-main/__pycache__/consts.cpython-311.pyc
-
-main/__pycache__/objloader.cpython-311.pyc
-
-main/__pycache__/pictures_consts.cpython-311.pyc
-
-main/__pycache__/run_camera.cpython-311.pyc
-
-main/__pycache__/run_meshroom.cpython-311.pyc
-
-outside_screen/__pycache__/consts.cpython-311.pyc
+main/__pycache__/
 
 outside_screen/__pycache__/
 

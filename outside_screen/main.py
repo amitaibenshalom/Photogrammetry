@@ -10,9 +10,12 @@ from consts import *
 
 
 def init_model(obj_file):
+    """
+    initialize the object model with the given obj file
+    """
     global viewport, output_directory, rx, ry, rz, zpos, obj, state
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glClearColor(226/255,233/255,241/255,1.0)
+    glClearColor(*BACKGROUND_COLOR)
     glLoadIdentity()
 
     center_object(obj_file)
@@ -30,10 +33,14 @@ def init_model(obj_file):
     glRotatef(rz, 0.0, 0.0, 1.0)
     obj.render()
 
+
 def rotate_model():
+    """
+    rotate the object model on the screen by 1 degree (not rendering the object, just rotating)
+    """
     global rx, ry, rz, obj, zpos
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glClearColor(226/255,233/255,241/255,1.0)
+    glClearColor(*BACKGROUND_COLOR)
     glLoadIdentity()
     ry += 1
     glTranslate(0,0,zpos)
@@ -42,10 +49,14 @@ def rotate_model():
     glRotatef(rz, 0.0, 0.0, 1.0)
     # obj.render()
 
+
 def render_model():
+    """
+    render the object model on the screen
+    """
     global rx, ry, rz, obj, zpos
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glClearColor(226/255,233/255,241/255,1.0)
+    glClearColor(*BACKGROUND_COLOR)
     glLoadIdentity()
     glTranslate(0,0,zpos)
     glRotatef(ry, 0.0, 1.0, 0.0)
@@ -53,13 +64,11 @@ def render_model():
     glRotatef(rz, 0.0, 0.0, 1.0)
     obj.render()
 
-def end_model_view():
-    global screen
-    # pygame.display.quit()
-    # pygame.display.init()
-    print("end_model_view called - doing nothing")
 
 def get_nth_obj_in_folder(folder_path, n):
+    """
+    get the nth obj file and texture file in the given folder path
+    """
     items = os.listdir(folder_path)
     if len(items) == 0 or n >= len(items):
         return None
@@ -89,7 +98,7 @@ glEnable(GL_COLOR_MATERIAL)
 glEnable(GL_DEPTH_TEST)
 glShadeModel(GL_SMOOTH)
 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-glClearColor(226/255,233/255,241/255,1.0)
+glClearColor(*BACKGROUND_COLOR)
 
 glViewport(0, 0, width, height)
 glLoadIdentity()
@@ -98,20 +107,18 @@ glLoadIdentity()
 
 clock = pygame.time.Clock()
 rx, ry, rz = (-90,180,0)
-zpos = -4
 obj = None
 
 last_touch = time.time()
-time_to_idle = 10
 idle = False
-
-files_in_data_folder = os.listdir(photogrammetry_data_path)
+files_in_data_folder = len(os.listdir(photogrammetry_data_path))
 
 obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
 print(f"model path: {obj_file_path}")
 print(f"texture path: {texture_file_path}")
 init_model(obj_file_path)
 pygame.display.flip()
+
 
 running = True
 while running:
@@ -141,7 +148,7 @@ while running:
                 # print(f"model path: {obj_file_path}")
                 init_model(obj_file_path)      
 
-        elif event.type == MOUSEBUTTONDOWN:  # if mouse is CLICKED and dragged then rotate the model accordingly
+        elif event.type == MOUSEBUTTONDOWN:  # if mouse is dragged then rotate the model accordingly (not used because of the touch screen)
             last_touch = time.time()
             idle = False
             if event.button == 4:
@@ -156,7 +163,7 @@ while running:
                 # ry += (x - rx)
                 pass
 
-        elif event.type == MOUSEMOTION:
+        elif event.type == MOUSEMOTION:  # if mouse is moved then rotate the model accordingly (good for touch screen)
             last_touch = time.time()
             idle = False
             if event.buttons[0]:
@@ -169,10 +176,10 @@ while running:
             # zpos += event.y
             pass
 
-    if files_in_data_folder != os.listdir(photogrammetry_data_path):
-        files_in_data_folder = os.listdir(photogrammetry_data_path)
+    if files_in_data_folder != len(os.listdir(photogrammetry_data_path)):
+        files_in_data_folder = len(os.listdir(photogrammetry_data_path))
         model_number = 0
-        time.sleep(2)
+        time.sleep(TIME_TO_WAIT_FOR_NEW_MODEL)  # wait for the new model to be fully written
         obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
         init_model(obj_file_path)
     
