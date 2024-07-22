@@ -65,6 +65,18 @@ def render_model():
     obj.render()
 
 
+def show_error_screen():
+    """
+    show the error screen on the screen
+    """
+    global screen
+    font = pygame.font.Font(None, 36)  # Use default system font, size 36
+    text = f'Cant find any 3D models in the given folder: "{photogrammetry_data_path}" - please check the data folder and try again! Press ESC to exit window'
+    text_surface = font.render(text, True, (0,0,0))  # Render the text
+    screen.fill((255, 255, 255))  # Fill the screen with white
+    screen.blit(text_surface, (0, 0))
+
+
 def get_nth_obj_in_folder(folder_path, n):
     """
     get the nth obj file and texture file in the given folder path
@@ -83,6 +95,27 @@ screen_info = pygame.display.Info()
 viewport = (screen_info.current_w,screen_info.current_h)
 width = screen_info.current_w
 height = screen_info.current_h
+screen = None
+
+obj_file_path, texture_file_path = None, None
+try:
+    obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
+except:
+    ERROR_STATE = True
+    print("No obj file found in the given folder")
+    screen = pygame.display.set_mode(viewport, pygame.FULLSCREEN)
+    show_error_screen()
+    pygame.display.flip()
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    pygame.quit()
+        pygame.display.flip()
+    exit()
+
 
 screen = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF | pygame.FULLSCREEN)
 gluPerspective(70.0, width/float(height), 1, 100.0)
