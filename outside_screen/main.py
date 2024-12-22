@@ -7,9 +7,10 @@ from pygame.locals import *
 from pygame.constants import *
 from objloader import *
 from consts import *
+from shutil import rmtree
 
 
-def init_model(obj_file):
+def init_model(obj_file, render=True):
     """
     initialize the object model with the given obj file
     """
@@ -31,10 +32,12 @@ def init_model(obj_file):
     glRotatef(ry, 0.0, 1.0, 0.0)
     glRotatef(rx, 1.0, 0.0, 0.0)
     glRotatef(rz, 0.0, 0.0, 1.0)
-    obj.render()
+    
+    if render:
+        obj.render()
 
 
-def rotate_model():
+def rotate_model(render=False):
     """
     rotate the object model on the screen by 1 degree (not rendering the object, just rotating)
     """
@@ -47,7 +50,9 @@ def rotate_model():
     glRotatef(ry, 0.0, 1.0, 0.0)
     glRotatef(rx, 1.0, 0.0, 0.0)
     glRotatef(rz, 0.0, 0.0, 1.0)
-    # obj.render()
+
+    if render:
+        obj.render()
 
 
 def render_model():
@@ -65,13 +70,17 @@ def render_model():
     obj.render()
 
 
-def show_error_screen():
+def show_error_screen(msg=1):
     """
     show the error screen on the screen
     """
     global screen
     font = pygame.font.Font(None, 36)  # Use default system font, size 36
     text = f'Cant find any 3D models in the given folder: "{photogrammetry_data_path}" - please check the data folder and try again! Press ESC to exit window'
+    
+    if msg == 2:
+        text = f'Error in loading model: "{obj_file_path}" - object might be corrupted, try deleting it. Press ESC to exit window'
+
     text_surface = font.render(text, True, (0,0,0))  # Render the text
     screen.fill((255, 255, 255))  # Fill the screen with white
     screen.blit(text_surface, (0, 0))
@@ -83,8 +92,13 @@ def get_nth_obj_in_folder(folder_path, n):
     """
     items = os.listdir(folder_path)
     items = sorted(items)
-    if len(items) == 0 or n >= len(items):
-        return None
+    
+    if len(items) == 0:
+        raise FileNotFoundError(f"No files found in the given folder: {folder_path}")
+    
+    if n >= len(items):
+        raise IndexError(f"Index out of range: {n} - the folder has only {len(items)} files")
+    
     n += 1
     obj_file_path = os.path.join(folder_path, items[-n], obj_path)
     texture_file_path = os.path.join(folder_path, items[-n], texture_path)
@@ -96,27 +110,6 @@ screen_info = pygame.display.Info()
 viewport = (screen_info.current_w,screen_info.current_h)
 width = screen_info.current_w
 height = screen_info.current_h
-screen = None
-
-obj_file_path, texture_file_path = None, None
-try:
-    obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-except:
-    ERROR_STATE = True
-    print("No obj file found in the given folder")
-    screen = pygame.display.set_mode(viewport, pygame.FULLSCREEN)
-    show_error_screen()
-    pygame.display.flip()
-    while True:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    pygame.quit()
-        pygame.display.flip()
-    exit()
-
 
 screen = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF | pygame.FULLSCREEN)
 gluPerspective(70.0, width/float(height), 1, 100.0)
@@ -142,14 +135,52 @@ glLoadIdentity()
 clock = pygame.time.Clock()
 rx, ry, rz = (-90,180,0)
 obj = None
-
 last_touch = time.time()
 idle = False
+obj_file_path, texture_file_path = None, None
+
+try:
+    obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
+
+except:
+    print("No obj file found in the given folder")
+    screen = pygame.display.set_mode(viewport, pygame.FULLSCREEN)
+    show_error_screen()
+    pygame.display.flip()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    pygame.quit()
+        pygame.display.flip()
+    exit()
+
 files_in_data_folder = len(os.listdir(photogrammetry_data_path))
+
+try:
+    init_model(obj_file_path)
+
+except:
+    print("No obj file found in the given folder")
+    screen = pygame.display.set_mode(viewport, pygame.FULLSCREEN)
+    show_error_screen(msg=2)
+    pygame.display.flip()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    pygame.quit()
+        pygame.display.flip()
+    exit()
+
 print(f"model path: {obj_file_path}")
 print(f"texture path: {texture_file_path}")
-init_model(obj_file_path)
-pygame.display.flip()
 
 
 running = True
@@ -170,7 +201,17 @@ while running:
                     model_number = 0
                 obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
                 print(f"model path: {obj_file_path}")
-                init_model(obj_file_path)
+                try:
+                    init_model(obj_file_path)
+                except:
+                    print(f"Error in loading model {obj_file_path}")
+                    # # the obj file is probably corrupted, remove it's parent folder
+                    # # get two directories up and remove the folder
+                    # parent_folder = os.path.dirname(os.path.dirname(obj_file_path))
+                    # print(f"Removing folder: {parent_folder}")
+                    # # delete the folder (and all it's contents)
+                    # # rmtree(parent_folder)
+
 
             if event.key == K_l:
                 model_number -= 1
@@ -178,7 +219,15 @@ while running:
                     model_number = min(MAX_MODEL_NUMBER-1, len(os.listdir(photogrammetry_data_path)) - 1)
                 obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
                 print(f"model path: {obj_file_path}")
-                init_model(obj_file_path)      
+                try:
+                    init_model(obj_file_path)
+                except:
+                    print(f"Error in loading model {obj_file_path}")
+                    # # the obj file is probably corrupted, remove it's parent folder
+                    # # get two directories up and remove the folder
+                    # parent_folder = os.path.dirname(os.path.dirname(obj_file_path))
+                    # print(f"Removing folder: {parent_folder}")
+                    # # rmtree(parent_folder)
 
         elif event.type == MOUSEBUTTONDOWN:  # if mouse is dragged then rotate the model accordingly (not used because of the touch screen)
             last_touch = time.time()
@@ -223,6 +272,6 @@ while running:
     
     render_model()
     pygame.display.flip()
-    clock.tick(30)
+    clock.tick(60)
 
 
