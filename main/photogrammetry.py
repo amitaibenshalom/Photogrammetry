@@ -187,6 +187,7 @@ while True:
                     ret = take_picture(input_directory, str(image_number) + image_format)
                 else:
                     ret = take_picture(input_directory, str(image_number) + image_format, save_to_images_folder=True, timestamp=timeString)
+
                 if not ret:
                     print("ERROR TAKING PICTURE " + str(image_number))
                     logging.critical('ERROR TAKING PICTURE ' + str(image_number))
