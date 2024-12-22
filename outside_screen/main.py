@@ -82,6 +82,7 @@ def get_nth_obj_in_folder(folder_path, n):
     get the nth obj file and texture file in the given folder path
     """
     items = os.listdir(folder_path)
+    items = sorted(items)
     if len(items) == 0 or n >= len(items):
         return None
     n += 1
@@ -127,7 +128,7 @@ glMatrixMode(GL_MODELVIEW)
 # glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
 # glEnable(GL_LIGHT0)
 # glEnable(GL_LIGHTING)
-# glEnable(GL_COLOR_MATERIAL)llr
+# glEnable(GL_COLOR_MATERIAL)
 glEnable(GL_DEPTH_TEST)
 glShadeModel(GL_SMOOTH)
 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -145,8 +146,6 @@ obj = None
 last_touch = time.time()
 idle = False
 files_in_data_folder = len(os.listdir(photogrammetry_data_path))
-
-obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
 print(f"model path: {obj_file_path}")
 print(f"texture path: {texture_file_path}")
 init_model(obj_file_path)
@@ -170,7 +169,7 @@ while running:
                 if model_number >= MAX_MODEL_NUMBER or model_number >= len(os.listdir(photogrammetry_data_path)):
                     model_number = 0
                 obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-                # print(f"model path: {obj_file_path}")
+                print(f"model path: {obj_file_path}")
                 init_model(obj_file_path)
 
             if event.key == K_l:
@@ -178,7 +177,7 @@ while running:
                 if model_number < 0:
                     model_number = min(MAX_MODEL_NUMBER-1, len(os.listdir(photogrammetry_data_path)) - 1)
                 obj_file_path, texture_file_path = get_nth_obj_in_folder(photogrammetry_data_path, model_number)
-                # print(f"model path: {obj_file_path}")
+                print(f"model path: {obj_file_path}")
                 init_model(obj_file_path)      
 
         elif event.type == MOUSEBUTTONDOWN:  # if mouse is dragged then rotate the model accordingly (not used because of the touch screen)
