@@ -216,6 +216,7 @@ while True:
                 error_stopwatch = None
         if is_meshroom_done() and not is_meshroom_success():
             logging.error('meshroom failed')
+            shutil.rmtree(cache_directory, ignore_errors=True, onerror=None)
             state = State.ERROR
             error_stopwatch = None
             processing_stopwatch = None
