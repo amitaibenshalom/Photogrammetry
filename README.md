@@ -18,3 +18,5 @@ Directory **"arduino"**: arduino code for running the moving camera about 70 deg
 - **Spinning-Arm-Photogrammetry.ino** - main code for arduino.
 - **Consts.h** - consts header.
 - **Basic_Routines.h** - basic routines for moving arm.
+
+![model](https://github.com/user-attachments/assets/9c437046-5932-4d69-b19a-3a79224ddd19)
